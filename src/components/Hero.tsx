@@ -5,6 +5,8 @@ import FadeIn from "./FadeIn";
 import RoleRotator from "./RoleRotator";
 
 const introGreetings = ["Hello", "Namaste", "Bonjour"];
+const INTRO_MAX_MS = 4300;
+const CLOUD_TRANSITION_MS = 720;
 const heroSkills = ["AWS", "Docker", "Terraform", "CI/CD", "FastAPI", "AI/ML"];
 const valueStatements = [
   "Deployable cloud systems",
@@ -44,7 +46,7 @@ function GreetingOverlay() {
           <span
             key={word}
             className="intro-greeting absolute inset-0 flex items-center justify-center px-6 font-display text-[clamp(3.8rem,10vw,8rem)] text-white drop-shadow-[0_18px_40px_rgba(0,0,0,0.8)]"
-            style={{ animationDelay: `${index * 1.55}s` }}
+            style={{ animationDelay: `${index * 1.05}s` }}
           >
             {word}
           </span>
@@ -264,6 +266,9 @@ export default function Hero() {
     reduceMotion ? "done" : "video",
   );
   const [introVideoReady, setIntroVideoReady] = useState(false);
+  const startIntroTransition = () => {
+    setIntroPhase((phase) => (phase === "video" ? "clouds" : phase));
+  };
 
   useEffect(() => {
     if (reduceMotion) {
@@ -274,7 +279,7 @@ export default function Hero() {
   useEffect(() => {
     if (introPhase !== "clouds") return;
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-    const timer = window.setTimeout(() => setIntroPhase("done"), 1450);
+    const timer = window.setTimeout(() => setIntroPhase("done"), CLOUD_TRANSITION_MS);
     return () => window.clearTimeout(timer);
   }, [introPhase]);
 
@@ -288,10 +293,12 @@ export default function Hero() {
     if (introPhase !== "video") return;
     const video = introVideoRef.current;
     if (!video) return;
+    const maxIntroTimer = window.setTimeout(startIntroTransition, INTRO_MAX_MS);
 
     const startIntro = () => {
       try {
         video.currentTime = 0;
+        video.playbackRate = 1.08;
       } catch {
         // Some browsers can reject currentTime while metadata is still settling.
       }
@@ -300,17 +307,20 @@ export default function Hero() {
         .play()
         .then(() => setIntroVideoReady(true))
         .catch(() => {
-          setIntroPhase("clouds");
+          startIntroTransition();
         });
     };
 
     if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
       startIntro();
-      return;
+      return () => window.clearTimeout(maxIntroTimer);
     }
 
     video.addEventListener("loadeddata", startIntro, { once: true });
-    return () => video.removeEventListener("loadeddata", startIntro);
+    return () => {
+      window.clearTimeout(maxIntroTimer);
+      video.removeEventListener("loadeddata", startIntro);
+    };
   }, [introPhase]);
 
   useEffect(() => {
@@ -324,7 +334,7 @@ export default function Hero() {
 
     const skipIntro = (event: Event) => {
       event.preventDefault();
-      setIntroPhase((phase) => (phase === "video" ? "clouds" : phase));
+      startIntroTransition();
     };
     const skipIntroFromKey = (event: KeyboardEvent) => {
       const keys = ["ArrowDown", "PageDown", " ", "Spacebar", "Enter"];
@@ -352,6 +362,7 @@ export default function Hero() {
           className="fixed inset-0 z-40 bg-[#0C0C0C]"
           initial={{ opacity: 1 }}
           animate={{ opacity: introPhase === "clouds" ? 0.92 : 1 }}
+          transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
           exit={{ opacity: 0 }}
           aria-hidden="true"
         >
@@ -366,8 +377,8 @@ export default function Hero() {
                 autoPlay
                 preload="auto"
                 onPlaying={() => setIntroVideoReady(true)}
-                onEnded={() => setIntroPhase("clouds")}
-                onError={() => setIntroPhase("clouds")}
+                onEnded={startIntroTransition}
+                onError={startIntroTransition}
               />
               <div className="absolute inset-0 bg-black/25" />
               <div className="intro-vignette absolute inset-0" />
@@ -388,7 +399,7 @@ export default function Hero() {
               opacity: introPhase === "clouds" ? 0.95 : 0,
               scale: introPhase === "clouds" ? 1.1 : 1,
             }}
-            transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.72, ease: [0.16, 1, 0.3, 1] }}
           />
           <motion.div
             className="absolute inset-0 bg-gradient-to-b from-[#0C0C0C] via-transparent to-[#0C0C0C]"
