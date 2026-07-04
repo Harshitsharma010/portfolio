@@ -5,8 +5,10 @@ import FadeIn from "./FadeIn";
 import RoleRotator from "./RoleRotator";
 
 const introGreetings = ["Hello", "Namaste", "Bonjour"];
+const PRE_INTRO_MS = 4200;
 const INTRO_MAX_MS = 4300;
 const CLOUD_TRANSITION_MS = 720;
+const welcomeText = "Glad you stopped by. Let's inspect what I build.";
 const heroSkills = ["AWS", "Docker", "Terraform", "CI/CD", "FastAPI", "AI/ML"];
 const valueStatements = [
   "Deployable cloud systems",
@@ -53,6 +55,138 @@ function GreetingOverlay() {
         ))}
       </div>
     </div>
+  );
+}
+
+function WelcomeIntro({
+  reduceMotion,
+  onContinue,
+  onSkipTo,
+}: {
+  reduceMotion: boolean | null;
+  onContinue: () => void;
+  onSkipTo: (targetId: string) => void;
+}) {
+  const [typedText, setTypedText] = useState(reduceMotion ? welcomeText : "");
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (reduceMotion) {
+      setTypedText(welcomeText);
+      return;
+    }
+
+    setTypedText("");
+    let index = 0;
+    let typeTimer = 0;
+    const startTimer = window.setTimeout(() => {
+      typeTimer = window.setInterval(() => {
+        index += 1;
+        setTypedText(welcomeText.slice(0, index));
+
+        if (index >= welcomeText.length) {
+          window.clearInterval(typeTimer);
+        }
+      }, 34);
+    }, 260);
+
+    return () => {
+      window.clearTimeout(startTimer);
+      window.clearInterval(typeTimer);
+    };
+  }, [reduceMotion]);
+
+  const copyEmail = async () => {
+    try {
+      await navigator.clipboard.writeText("harshitbhardwajhs@gmail.com");
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1400);
+    } catch {
+      onContinue();
+    }
+  };
+
+  return (
+    <motion.div
+      className="absolute inset-0 z-30 overflow-hidden bg-[#0C0C0C]"
+      initial={reduceMotion ? false : { opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
+    >
+      <div className="noise-field absolute inset-0 opacity-55" aria-hidden="true" />
+      <div className="film-grain pointer-events-none absolute inset-0 opacity-45" aria-hidden="true" />
+      <div className="cinematic-stars absolute inset-0 opacity-20" aria-hidden="true" />
+      <div
+        className="absolute inset-0 bg-[radial-gradient(circle_at_76%_28%,rgba(217,184,111,0.13),transparent_30%),radial-gradient(circle_at_22%_70%,rgba(215,226,234,0.08),transparent_30%),linear-gradient(180deg,rgba(0,0,0,0.4),rgba(0,0,0,0.88))]"
+        aria-hidden="true"
+      />
+
+      <div className="relative z-10 mx-auto flex min-h-screen max-w-7xl flex-col justify-center px-5 py-24 sm:px-8 md:px-10">
+        <motion.div
+          className="max-w-4xl"
+          initial={reduceMotion ? false : { opacity: 0, y: 20, filter: "blur(8px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          transition={{ duration: 0.72, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <div className="inline-flex rounded-full border border-white/15 bg-white/[0.06] px-4 py-2 backdrop-blur-xl">
+            <p className="text-sm font-light leading-6 text-white/78 sm:text-base">
+              Initializing workspace. Cloud systems, AI signals, and deployable proof.
+            </p>
+          </div>
+
+          <h2 className="mt-9 min-h-[5.8em] max-w-3xl text-[clamp(2.45rem,6vw,5.4rem)] font-black uppercase leading-[0.92] tracking-[-0.035em] text-[#F4F7F8] sm:min-h-[3.1em]">
+            <span className={typedText.length < welcomeText.length ? "preintro-cursor" : ""}>
+              {typedText}
+            </span>
+          </h2>
+
+          <div className="mt-9 flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={() => onSkipTo("projects")}
+              className="preintro-pill rounded-full bg-[#F4F7F8] px-6 py-3 text-sm font-medium text-[#0C0C0C] transition-colors hover:bg-white"
+              style={{ animationDelay: "0.7s" }}
+            >
+              View Projects
+            </button>
+            <button
+              type="button"
+              onClick={() => onSkipTo("proof")}
+              className="preintro-pill rounded-full bg-[#F4F7F8] px-6 py-3 text-sm font-medium text-[#0C0C0C] transition-colors hover:bg-white"
+              style={{ animationDelay: "0.8s" }}
+            >
+              See Live Proof
+            </button>
+            <a
+              href="/Harshit-Sharma-Resume.pdf"
+              target="_blank"
+              rel="noreferrer"
+              className="preintro-pill rounded-full bg-[#F4F7F8] px-6 py-3 text-sm font-medium text-[#0C0C0C] transition-colors hover:bg-white"
+              style={{ animationDelay: "0.9s" }}
+            >
+              Open Resume
+            </a>
+            <button
+              type="button"
+              onClick={onContinue}
+              className="preintro-pill rounded-full border border-white/30 bg-white/[0.04] px-6 py-3 text-sm font-medium text-white backdrop-blur-xl transition-colors hover:bg-white hover:text-[#0C0C0C]"
+              style={{ animationDelay: "1s" }}
+            >
+              Enter Portfolio
+            </button>
+            <button
+              type="button"
+              onClick={copyEmail}
+              className="preintro-pill rounded-full border border-white/20 bg-white/[0.03] px-6 py-3 text-sm font-light text-white/82 backdrop-blur-xl transition-colors hover:bg-white/[0.09] hover:text-white"
+              style={{ animationDelay: "1.1s" }}
+            >
+              {copied ? "Email copied" : "Reach me: harshitbhardwajhs@gmail.com"}
+            </button>
+          </div>
+        </motion.div>
+      </div>
+    </motion.div>
   );
 }
 
@@ -262,12 +396,28 @@ export default function Hero() {
   const galaxyY = useTransform(scrollYProgress, [0, 1], [0, -70]);
   const galaxyScale = useTransform(scrollYProgress, [0, 1], [1, 0.92]);
   const galaxyOpacity = useTransform(scrollYProgress, [0, 0.84, 1], [1, 0.72, 0.22]);
-  const [introPhase, setIntroPhase] = useState<"video" | "clouds" | "done">(
-    reduceMotion ? "done" : "video",
+  const [introPhase, setIntroPhase] = useState<"welcome" | "video" | "clouds" | "done">(
+    reduceMotion ? "done" : "welcome",
   );
   const [introVideoReady, setIntroVideoReady] = useState(false);
+  const startTrainVideo = () => {
+    setIntroPhase((phase) => (phase === "welcome" ? "video" : phase));
+  };
   const startIntroTransition = () => {
     setIntroPhase((phase) => (phase === "video" ? "clouds" : phase));
+  };
+  const advanceIntro = () => {
+    setIntroPhase((phase) => {
+      if (phase === "welcome") return "video";
+      if (phase === "video") return "clouds";
+      return phase;
+    });
+  };
+  const skipIntroTo = (targetId: string) => {
+    setIntroPhase("done");
+    window.setTimeout(() => {
+      document.getElementById(targetId)?.scrollIntoView({ block: "start" });
+    }, 40);
   };
 
   useEffect(() => {
@@ -275,6 +425,12 @@ export default function Hero() {
       setIntroPhase("done");
     }
   }, [reduceMotion]);
+
+  useEffect(() => {
+    if (introPhase !== "welcome") return;
+    const timer = window.setTimeout(startTrainVideo, PRE_INTRO_MS);
+    return () => window.clearTimeout(timer);
+  }, [introPhase]);
 
   useEffect(() => {
     if (introPhase !== "clouds") return;
@@ -334,7 +490,7 @@ export default function Hero() {
 
     const skipIntro = (event: Event) => {
       event.preventDefault();
-      startIntroTransition();
+      advanceIntro();
     };
     const skipIntroFromKey = (event: KeyboardEvent) => {
       const keys = ["ArrowDown", "PageDown", " ", "Spacebar", "Enter"];
@@ -366,6 +522,13 @@ export default function Hero() {
           exit={{ opacity: 0 }}
           aria-hidden="true"
         >
+          {introPhase === "welcome" ? (
+            <WelcomeIntro
+              reduceMotion={reduceMotion}
+              onContinue={startTrainVideo}
+              onSkipTo={skipIntroTo}
+            />
+          ) : null}
           {introPhase === "video" ? (
             <>
               <video
