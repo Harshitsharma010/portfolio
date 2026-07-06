@@ -69,6 +69,7 @@ function WelcomeIntro({
 }) {
   const [typedText, setTypedText] = useState(reduceMotion ? welcomeText : "");
   const [copied, setCopied] = useState(false);
+  const [pointer, setPointer] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     if (reduceMotion) {
@@ -106,9 +107,28 @@ function WelcomeIntro({
     }
   };
 
+  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (reduceMotion) return;
+    setPointer({
+      x: (event.clientX / window.innerWidth - 0.5) * 2,
+      y: (event.clientY / window.innerHeight - 0.5) * 2,
+    });
+  };
+
+  const headTransform = reduceMotion
+    ? "translate3d(-50%, 0, 0)"
+    : `translate3d(calc(-50% + ${pointer.x * 28}px), ${pointer.y * 18}px, 0) rotate(${pointer.x * 3.2}deg)`;
+  const cursorTransform = reduceMotion
+    ? "translate3d(0, 0, 0) rotate(-11deg)"
+    : `translate3d(${pointer.x * 110}px, ${pointer.y * 74}px, 0) rotate(${-11 + pointer.x * 5}deg)`;
+  const ringTransform = reduceMotion
+    ? "translate3d(0, 0, 0) scale(1)"
+    : `translate3d(${pointer.x * 92}px, ${pointer.y * 62}px, 0) scale(${1 + Math.abs(pointer.x) * 0.08})`;
+
   return (
     <motion.div
       className="absolute inset-0 z-30 overflow-hidden bg-[#D7D6D1] text-[#111111]"
+      onPointerMove={handlePointerMove}
       initial={reduceMotion ? false : { opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -221,14 +241,24 @@ function WelcomeIntro({
           animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
             transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
         >
-            <div className="preintro-photo-stage relative aspect-[0.86] w-[min(64vw,260px)] overflow-hidden rounded-[26px] border border-black/10 bg-[#BDBCB6] shadow-[0_28px_80px_rgba(17,17,17,0.22)] md:w-[min(78vw,410px)]">
+            <div className="preintro-photo-stage preintro-person-stage relative aspect-[0.86] w-[min(64vw,260px)] overflow-hidden rounded-[26px] border border-black/10 bg-[#C7C5BF] shadow-[0_28px_80px_rgba(17,17,17,0.22)] md:w-[min(78vw,410px)]">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_56%_25%,rgba(255,255,255,0.62),transparent_34%),linear-gradient(180deg,#D6D4CE,#B9B8B2)]" />
               <img
-                src="https://github.com/Harshitsharma010.png"
-                alt="Harshit Sharma"
-                className="h-full w-full object-cover contrast-[0.95] saturate-[0.9]"
+                src="/media/intro-monitor-body.png"
+                alt=""
+                className="absolute bottom-0 left-1/2 z-[1] w-[82%] -translate-x-1/2 select-none"
                 loading="eager"
+                draggable={false}
               />
-              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.1),transparent_34%,rgba(0,0,0,0.2))]" />
+              <img
+                src="/media/intro-monitor-head.png"
+                alt="Monitor head portrait"
+                className="preintro-monitor-head absolute left-1/2 top-[10%] z-[2] w-[57%] select-none md:top-[9%]"
+                style={{ transform: headTransform }}
+                loading="eager"
+                draggable={false}
+              />
+              <div className="absolute inset-0 z-[3] bg-[linear-gradient(180deg,rgba(255,255,255,0.08),transparent_42%,rgba(0,0,0,0.1))]" />
               <div className="absolute bottom-5 left-5 rounded-full bg-white/80 px-4 py-2 text-sm font-medium text-black shadow-[0_8px_24px_rgba(0,0,0,0.12)] backdrop-blur-xl">
                 Harshit Sharma
               </div>
@@ -236,12 +266,12 @@ function WelcomeIntro({
                 Cloud / DevOps / AI
               </div>
             </div>
-            <div className="preintro-cursor-arrow" aria-hidden="true">
+            <div className="preintro-cursor-arrow" style={{ transform: cursorTransform }} aria-hidden="true">
               <svg viewBox="0 0 54 64" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M7 5L45 42L27 45L18 59L7 5Z" fill="#111111" stroke="#F4F1EA" strokeWidth="4" strokeLinejoin="round" />
               </svg>
             </div>
-            <span className="preintro-cursor-ring" aria-hidden="true" />
+            <span className="preintro-cursor-ring" style={{ transform: ringTransform }} aria-hidden="true" />
           </motion.div>
         </div>
       </div>
