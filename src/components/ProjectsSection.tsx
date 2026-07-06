@@ -12,26 +12,22 @@ function ProjectCard({ project, index, total }: { project: Project; index: numbe
     target: ref,
     offset: ["start 0.78", "end 0.22"],
   });
-  const targetScale = 1 - (total - 1 - index) * 0.026;
-  const scale = useTransform(scrollYProgress, [0, 0.58, 1], [1, 1, targetScale]);
-  const y = useTransform(scrollYProgress, [0, 0.52, 1], [0, 0, -42 - index * 12]);
-  const opacity = useTransform(scrollYProgress, [0, 0.78, 1], [1, 1, 0.82]);
-  const filter = useTransform(scrollYProgress, [0, 0.72, 1], ["blur(0px)", "blur(0px)", "blur(2px)"]);
+  const scale = useTransform(scrollYProgress, [0, 0.45, 1], [0.99, 1, 0.975]);
+  const y = useTransform(scrollYProgress, [0, 0.45, 1], [18, 0, -10]);
+  const opacity = useTransform(scrollYProgress, [0, 0.18, 0.86, 1], [0.86, 1, 1, 0.92]);
 
   return (
-    <div ref={ref} className="relative lg:h-[112vh]">
+    <div ref={ref} className={`relative lg:h-[100vh] ${index > 0 ? "lg:-mt-[14vh]" : ""}`}>
       <motion.article
-        className={`border border-[#D7E2EA]/[0.18] bg-[#0C0C0C] p-5 text-[#D7E2EA] shadow-[0_26px_70px_rgba(0,0,0,0.42)] lg:sticky lg:max-h-[calc(100vh-7rem)] lg:overflow-hidden ${
+        className={`border border-[#D7E2EA]/[0.18] bg-[#0C0C0C] p-5 text-[#D7E2EA] shadow-[0_26px_70px_rgba(0,0,0,0.42)] lg:sticky lg:top-[calc(50vh-290px)] lg:max-h-[min(640px,calc(100vh-8rem))] lg:overflow-hidden ${
           isFeatured ? "md:p-7" : "md:p-6"
         }`}
         style={{
-          top: `${86 + index * 14}px`,
           scale: reduceMotion ? 1 : scale,
           y: reduceMotion ? 0 : y,
           opacity: reduceMotion ? 1 : opacity,
-          filter: reduceMotion ? "none" : filter,
-          zIndex: total - index,
-          transformOrigin: "50% 100%",
+          zIndex: total + index,
+          transformOrigin: "50% 50%",
         }}
       >
       <div className="grid gap-8 lg:grid-cols-[0.46fr_0.54fr]">
@@ -161,7 +157,7 @@ export default function ProjectsSection() {
         </div>
       </div>
 
-      <div className="relative z-10 mx-auto grid max-w-7xl gap-5">
+      <div className="relative z-10 mx-auto grid max-w-7xl gap-5 lg:gap-0">
         {projects.map((project, index) => (
           <ProjectCard key={project.title} project={project} index={index} total={projects.length} />
         ))}
