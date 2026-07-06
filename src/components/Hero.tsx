@@ -5,10 +5,10 @@ import FadeIn from "./FadeIn";
 import RoleRotator from "./RoleRotator";
 
 const introGreetings = ["Hello", "Namaste", "Bonjour"];
-const PRE_INTRO_MS = 4200;
+const PRE_INTRO_MS = 5200;
 const INTRO_MAX_MS = 4300;
 const CLOUD_TRANSITION_MS = 720;
-const welcomeText = "Glad you stopped by. Let's inspect what I build.";
+const welcomeText = "Harshit Sharma builds deployable cloud, AI, and backend systems.";
 const heroSkills = ["AWS", "Docker", "Terraform", "CI/CD", "FastAPI", "AI/ML"];
 const valueStatements = [
   "Deployable cloud systems",
@@ -108,83 +108,142 @@ function WelcomeIntro({
 
   return (
     <motion.div
-      className="absolute inset-0 z-30 overflow-hidden bg-[#0C0C0C]"
+      className="absolute inset-0 z-30 overflow-hidden bg-[#D7D6D1] text-[#111111]"
       initial={reduceMotion ? false : { opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
     >
-      <div className="noise-field absolute inset-0 opacity-55" aria-hidden="true" />
-      <div className="film-grain pointer-events-none absolute inset-0 opacity-45" aria-hidden="true" />
-      <div className="cinematic-stars absolute inset-0 opacity-20" aria-hidden="true" />
-      <div
-        className="absolute inset-0 bg-[radial-gradient(circle_at_76%_28%,rgba(217,184,111,0.13),transparent_30%),radial-gradient(circle_at_22%_70%,rgba(215,226,234,0.08),transparent_30%),linear-gradient(180deg,rgba(0,0,0,0.4),rgba(0,0,0,0.88))]"
-        aria-hidden="true"
-      />
+      <div className="preintro-paper-grain absolute inset-0" aria-hidden="true" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_34%,rgba(255,255,255,0.48),transparent_36%),radial-gradient(circle_at_22%_74%,rgba(217,184,111,0.2),transparent_28%)]" aria-hidden="true" />
 
-      <div className="relative z-10 mx-auto flex min-h-screen max-w-7xl flex-col justify-center px-5 py-24 sm:px-8 md:px-10">
-        <motion.div
-          className="max-w-4xl"
+      <div className="relative z-10 mx-auto flex min-h-screen max-w-7xl flex-col px-5 py-5 sm:px-8 md:px-10">
+        <motion.header
+          className="flex items-center justify-between gap-4 text-sm font-medium"
+          initial={reduceMotion ? false : { opacity: 0, y: -14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <button type="button" onClick={onContinue} className="font-black tracking-[-0.035em]">
+            Harshit Sharma <span className="text-[#5D5B56]">*</span>
+          </button>
+          <div className="hidden items-center gap-1 text-[#35332F] md:flex">
+            <button type="button" onClick={() => onSkipTo("projects")} className="transition-opacity hover:opacity-60">
+              Projects
+            </button>
+            <span>,</span>
+            <button type="button" onClick={() => onSkipTo("proof")} className="transition-opacity hover:opacity-60">
+              Proof
+            </button>
+            <span>,</span>
+            <button type="button" onClick={() => onSkipTo("skills")} className="transition-opacity hover:opacity-60">
+              Skills
+            </button>
+            <span>,</span>
+            <button type="button" onClick={() => onSkipTo("contact")} className="transition-opacity hover:opacity-60">
+              Contact
+            </button>
+          </div>
+          <button type="button" onClick={copyEmail} className="underline decoration-black/35 underline-offset-4 transition-opacity hover:opacity-65">
+            Get in touch
+          </button>
+        </motion.header>
+
+        <div className="grid flex-1 items-center gap-10 py-10 md:grid-cols-[0.95fr_1.05fr] md:py-0">
+          <motion.div
+            className="relative z-20 max-w-2xl"
+            initial={reduceMotion ? false : { opacity: 0, y: 20, filter: "blur(8px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            transition={{ duration: 0.72, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <div className="inline-flex rounded-full border border-black/10 bg-white/30 px-4 py-2 shadow-[0_1px_0_rgba(255,255,255,0.45)] backdrop-blur-xl">
+              <p className="text-sm leading-6 text-black/72 sm:text-base">
+                Hey there, initializing workspace.
+                <br />
+                Cloud systems, AI signals, and deployable proof.
+              </p>
+            </div>
+
+            <h2 className="mt-7 min-h-[4.7em] text-[clamp(2.15rem,5vw,4.95rem)] font-black leading-[0.95] tracking-[-0.038em] text-[#111111] sm:min-h-[2.9em]">
+              <span className={typedText.length < welcomeText.length ? "preintro-cursor" : ""}>
+                {typedText}
+              </span>
+            </h2>
+
+            <div className="mt-7 flex flex-wrap gap-2.5">
+              <button
+                type="button"
+                onClick={() => onSkipTo("projects")}
+                className="preintro-pill rounded-full bg-white px-5 py-2.5 text-sm font-medium text-black shadow-[0_1px_0_rgba(0,0,0,0.08)] transition-colors hover:bg-black hover:text-white"
+                style={{ animationDelay: "0.7s" }}
+              >
+                View Projects
+              </button>
+              <button
+                type="button"
+                onClick={() => onSkipTo("proof")}
+                className="preintro-pill rounded-full bg-white px-5 py-2.5 text-sm font-medium text-black shadow-[0_1px_0_rgba(0,0,0,0.08)] transition-colors hover:bg-black hover:text-white"
+                style={{ animationDelay: "0.8s" }}
+              >
+                See Live Proof
+              </button>
+              <a
+                href="/Harshit-Sharma-Resume.pdf"
+                target="_blank"
+                rel="noreferrer"
+                className="preintro-pill rounded-full bg-white px-5 py-2.5 text-sm font-medium text-black shadow-[0_1px_0_rgba(0,0,0,0.08)] transition-colors hover:bg-black hover:text-white"
+                style={{ animationDelay: "0.9s" }}
+              >
+                Open Resume
+              </a>
+              <button
+                type="button"
+                onClick={onContinue}
+                className="preintro-pill rounded-full border border-black/15 bg-black px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-white hover:text-black"
+                style={{ animationDelay: "1s" }}
+              >
+                Enter Portfolio
+              </button>
+              <button
+                type="button"
+                onClick={copyEmail}
+                className="preintro-pill rounded-full border border-black/15 bg-white/35 px-5 py-2.5 text-sm text-black/74 backdrop-blur-xl transition-colors hover:bg-white hover:text-black"
+                style={{ animationDelay: "1.1s" }}
+              >
+                {copied ? "Email copied" : "Reach me"}
+              </button>
+            </div>
+          </motion.div>
+
+          <motion.div
+            className="relative mx-auto flex w-full max-w-[520px] items-center justify-center md:justify-end"
           initial={reduceMotion ? false : { opacity: 0, y: 20, filter: "blur(8px)" }}
           animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-          transition={{ duration: 0.72, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
         >
-          <div className="inline-flex rounded-full border border-white/15 bg-white/[0.06] px-4 py-2 backdrop-blur-xl">
-            <p className="text-sm font-light leading-6 text-white/78 sm:text-base">
-              Initializing workspace. Cloud systems, AI signals, and deployable proof.
-            </p>
-          </div>
-
-          <h2 className="mt-9 min-h-[5.8em] max-w-3xl text-[clamp(2.45rem,6vw,5.4rem)] font-black uppercase leading-[0.92] tracking-[-0.035em] text-[#F4F7F8] sm:min-h-[3.1em]">
-            <span className={typedText.length < welcomeText.length ? "preintro-cursor" : ""}>
-              {typedText}
-            </span>
-          </h2>
-
-          <div className="mt-9 flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={() => onSkipTo("projects")}
-              className="preintro-pill rounded-full bg-[#F4F7F8] px-6 py-3 text-sm font-medium text-[#0C0C0C] transition-colors hover:bg-white"
-              style={{ animationDelay: "0.7s" }}
-            >
-              View Projects
-            </button>
-            <button
-              type="button"
-              onClick={() => onSkipTo("proof")}
-              className="preintro-pill rounded-full bg-[#F4F7F8] px-6 py-3 text-sm font-medium text-[#0C0C0C] transition-colors hover:bg-white"
-              style={{ animationDelay: "0.8s" }}
-            >
-              See Live Proof
-            </button>
-            <a
-              href="/Harshit-Sharma-Resume.pdf"
-              target="_blank"
-              rel="noreferrer"
-              className="preintro-pill rounded-full bg-[#F4F7F8] px-6 py-3 text-sm font-medium text-[#0C0C0C] transition-colors hover:bg-white"
-              style={{ animationDelay: "0.9s" }}
-            >
-              Open Resume
-            </a>
-            <button
-              type="button"
-              onClick={onContinue}
-              className="preintro-pill rounded-full border border-white/30 bg-white/[0.04] px-6 py-3 text-sm font-medium text-white backdrop-blur-xl transition-colors hover:bg-white hover:text-[#0C0C0C]"
-              style={{ animationDelay: "1s" }}
-            >
-              Enter Portfolio
-            </button>
-            <button
-              type="button"
-              onClick={copyEmail}
-              className="preintro-pill rounded-full border border-white/20 bg-white/[0.03] px-6 py-3 text-sm font-light text-white/82 backdrop-blur-xl transition-colors hover:bg-white/[0.09] hover:text-white"
-              style={{ animationDelay: "1.1s" }}
-            >
-              {copied ? "Email copied" : "Reach me: harshitbhardwajhs@gmail.com"}
-            </button>
-          </div>
-        </motion.div>
+            <div className="preintro-photo-stage relative aspect-[0.86] w-[min(64vw,260px)] overflow-hidden rounded-[26px] border border-black/10 bg-[#BDBCB6] shadow-[0_28px_80px_rgba(17,17,17,0.22)] md:w-[min(78vw,410px)]">
+              <img
+                src="https://github.com/Harshitsharma010.png"
+                alt="Harshit Sharma"
+                className="h-full w-full object-cover contrast-[0.95] saturate-[0.9]"
+                loading="eager"
+              />
+              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.1),transparent_34%,rgba(0,0,0,0.2))]" />
+              <div className="absolute bottom-5 left-5 rounded-full bg-white/80 px-4 py-2 text-sm font-medium text-black shadow-[0_8px_24px_rgba(0,0,0,0.12)] backdrop-blur-xl">
+                Harshit Sharma
+              </div>
+              <div className="absolute right-5 top-5 rounded-full border border-black/10 bg-white/60 px-3 py-1.5 text-xs text-black/70 backdrop-blur-xl">
+                Cloud / DevOps / AI
+              </div>
+            </div>
+            <div className="preintro-cursor-arrow" aria-hidden="true">
+              <svg viewBox="0 0 54 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 5L45 42L27 45L18 59L7 5Z" fill="#111111" stroke="#F4F1EA" strokeWidth="4" strokeLinejoin="round" />
+              </svg>
+            </div>
+            <span className="preintro-cursor-ring" aria-hidden="true" />
+          </motion.div>
+        </div>
       </div>
     </motion.div>
   );
