@@ -73,20 +73,12 @@ function WelcomeIntro({
   const pointerY = useMotionValue(0);
   const smoothX = useSpring(pointerX, { stiffness: 150, damping: 24, mass: 0.35 });
   const smoothY = useSpring(pointerY, { stiffness: 150, damping: 24, mass: 0.35 });
-  const headX = useTransform(smoothX, [-1, 1], [-17, 17]);
-  const headY = useTransform(smoothY, [-1, 1], [-9, 9]);
-  const headRotateY = useTransform(smoothX, [-1, 1], [-12, 12]);
-  const headRotateX = useTransform(smoothY, [-1, 1], [7, -7]);
-  const bodyX = useTransform(smoothX, [-1, 1], [-8, 8]);
-  const bodyY = useTransform(smoothY, [-1, 1], [-5, 5]);
-  const bodyRotateY = useTransform(smoothX, [-1, 1], [-4, 4]);
-  const bodyRotateX = useTransform(smoothY, [-1, 1], [2.5, -2.5]);
-  const cursorX = useTransform(smoothX, [-1, 1], [-112, 112]);
-  const cursorY = useTransform(smoothY, [-1, 1], [-74, 74]);
-  const cursorRotate = useTransform(smoothX, [-1, 1], [-17, -5]);
-  const ringX = useTransform(smoothX, [-1, 1], [-92, 92]);
-  const ringY = useTransform(smoothY, [-1, 1], [-62, 62]);
-  const ringScale = useTransform(smoothX, [-1, 0, 1], [1.08, 1, 1.08]);
+  const figureX = useTransform(smoothX, [-1, 1], [-24, 24]);
+  const figureY = useTransform(smoothY, [-1, 1], [-12, 12]);
+  const figureRotateY = useTransform(smoothX, [-1, 1], [-10, 10]);
+  const figureRotateX = useTransform(smoothY, [-1, 1], [5, -5]);
+  const glowX = useTransform(smoothX, [-1, 1], [-16, 16]);
+  const glowY = useTransform(smoothY, [-1, 1], [-10, 10]);
 
   useEffect(() => {
     if (reduceMotion) {
@@ -138,7 +130,7 @@ function WelcomeIntro({
 
   return (
     <motion.div
-      className="absolute inset-0 z-30 overflow-hidden bg-[#D7D6D1] text-[#111111]"
+      className="preintro-mainframe-intro absolute inset-0 z-30 overflow-hidden bg-[#D7D6D1] text-[#111111]"
       onPointerMove={handlePointerMove}
       onPointerLeave={handlePointerLeave}
       initial={reduceMotion ? false : { opacity: 0 }}
@@ -249,47 +241,37 @@ function WelcomeIntro({
 
           <motion.div
             className="preintro-figure-shell relative mx-auto flex w-full max-w-[520px] items-center justify-center md:justify-end"
-            style={reduceMotion ? undefined : { rotateY: bodyRotateY, rotateX: bodyRotateX }}
-          initial={reduceMotion ? false : { opacity: 0, y: 20, filter: "blur(8px)" }}
-          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            style={reduceMotion ? undefined : { rotateY: figureRotateY, rotateX: figureRotateX }}
+            initial={reduceMotion ? false : { opacity: 0, y: 20, filter: "blur(8px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
             transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-        >
-            <div className="preintro-photo-stage preintro-person-stage relative aspect-[0.86] w-[min(64vw,260px)] overflow-hidden rounded-[26px] border border-black/10 bg-[#C7C5BF] shadow-[0_28px_80px_rgba(17,17,17,0.22)] md:w-[min(78vw,410px)]">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_56%_25%,rgba(255,255,255,0.62),transparent_34%),linear-gradient(180deg,#D6D4CE,#B9B8B2)]" />
-              <div className="absolute bottom-[-1%] left-1/2 z-[1] w-[87%] -translate-x-1/2">
+          >
+            <div className="preintro-photo-stage preintro-person-stage relative aspect-[0.86] w-[min(76vw,300px)] md:w-[min(44vw,430px)]">
+              <motion.div
+                className="preintro-figure-aura absolute inset-[7%] rounded-full"
+                style={reduceMotion ? undefined : { x: glowX, y: glowY }}
+                aria-hidden="true"
+              />
+              <div className="absolute bottom-0 left-1/2 z-[2] w-[106%] -translate-x-1/2">
                 <motion.img
-                  src="/media/intro-monitor-body.png"
-                  alt=""
-                  className="preintro-person-body w-full select-none"
-                  style={reduceMotion ? undefined : { x: bodyX, y: bodyY }}
+                  src="/media/intro-mainframe-person.png?v=2"
+                  alt="Retro monitor-headed portrait for Harshit Sharma"
+                  className="preintro-mainframe-person w-full select-none"
+                  style={reduceMotion ? undefined : { x: figureX, y: figureY }}
                   loading="eager"
                   draggable={false}
                 />
               </div>
-              <div className="absolute left-1/2 top-[15.5%] z-[2] w-[60%] -translate-x-1/2 md:top-[15.5%]">
-                <motion.img
-                  src="/media/intro-monitor-head.png"
-                  alt="Monitor head portrait"
-                  className="preintro-monitor-head w-full select-none"
-                  style={reduceMotion ? undefined : { x: headX, y: headY, rotateY: headRotateY, rotateX: headRotateX }}
-                  loading="eager"
-                  draggable={false}
-                />
-              </div>
-              <div className="absolute inset-0 z-[3] bg-[linear-gradient(180deg,rgba(255,255,255,0.08),transparent_42%,rgba(0,0,0,0.1))]" />
-              <div className="absolute bottom-5 left-5 rounded-full bg-white/80 px-4 py-2 text-sm font-medium text-black shadow-[0_8px_24px_rgba(0,0,0,0.12)] backdrop-blur-xl">
-                Harshit Sharma
-              </div>
-              <div className="absolute right-5 top-5 rounded-full border border-black/10 bg-white/60 px-3 py-1.5 text-xs text-black/70 backdrop-blur-xl">
+              <motion.span
+                className="preintro-screen-bloom"
+                style={reduceMotion ? undefined : { x: glowX, y: glowY }}
+                aria-hidden="true"
+              />
+              <div className="preintro-figure-shadow absolute bottom-[1%] left-1/2 z-[1] h-12 w-[78%] -translate-x-1/2 rounded-full bg-black/20 blur-2xl" />
+              <div className="absolute right-0 top-[14%] z-[3] rounded-full border border-black/10 bg-white/65 px-3 py-1.5 text-xs text-black/70 backdrop-blur-xl">
                 Cloud / DevOps / AI
               </div>
             </div>
-            <motion.div className="preintro-cursor-arrow" style={reduceMotion ? undefined : { x: cursorX, y: cursorY, rotate: cursorRotate }} aria-hidden="true">
-              <svg viewBox="0 0 54 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M7 5L45 42L27 45L18 59L7 5Z" fill="#111111" stroke="#F4F1EA" strokeWidth="4" strokeLinejoin="round" />
-              </svg>
-            </motion.div>
-            <motion.span className="preintro-cursor-ring" style={reduceMotion ? undefined : { x: ringX, y: ringY, scale: ringScale }} aria-hidden="true" />
           </motion.div>
         </div>
       </div>
