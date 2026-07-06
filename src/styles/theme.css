@@ -23,6 +23,7 @@
 }
 
 html {
+  overflow-x: hidden;
   scroll-behavior: smooth;
 }
 
@@ -36,6 +37,7 @@ body {
 
 #root {
   min-height: 100vh;
+  overflow-x: hidden;
   background: #0c0c0c;
 }
 
@@ -126,6 +128,7 @@ a {
 }
 
 .preintro-photo-stage {
+  overflow: visible;
   transform-style: preserve-3d;
   will-change: transform;
 }
@@ -136,9 +139,15 @@ a {
 }
 
 .preintro-figure-shell {
+  overflow: visible;
   perspective: 900px;
   transform-style: preserve-3d;
   will-change: transform;
+}
+
+.preintro-character-frame {
+  position: absolute;
+  overflow: visible;
 }
 
 .preintro-figure-aura {
@@ -154,11 +163,17 @@ a {
 
 .preintro-mainframe-body {
   transform-origin: 50% 100%;
+  transform: none;
   filter: drop-shadow(0 24px 34px rgba(0, 0, 0, 0.16)) saturate(0.94) contrast(1.03);
 }
 
 .preintro-mainframe-head {
-  transform-origin: 51% 34%;
+  position: absolute;
+  left: 20.27%;
+  top: 6.93%;
+  z-index: 2;
+  width: 63.79%;
+  transform-origin: center bottom;
   transform-style: preserve-3d;
   will-change: transform;
   filter: drop-shadow(0 18px 24px rgba(0, 0, 0, 0.2)) saturate(0.94) contrast(1.04);
@@ -166,8 +181,8 @@ a {
 
 .preintro-screen-bloom {
   position: absolute;
-  left: 34%;
-  top: 28%;
+  left: 41%;
+  top: 27%;
   z-index: 3;
   width: 31%;
   height: 18%;

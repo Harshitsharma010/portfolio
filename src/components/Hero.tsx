@@ -69,17 +69,18 @@ function WelcomeIntro({
 }) {
   const [typedText, setTypedText] = useState(reduceMotion ? welcomeText : "");
   const [copied, setCopied] = useState(false);
+  const [canTrackPointer, setCanTrackPointer] = useState(false);
+  const [isHeadActive, setIsHeadActive] = useState(false);
   const pointerX = useMotionValue(0);
   const pointerY = useMotionValue(0);
-  const smoothX = useSpring(pointerX, { stiffness: 150, damping: 24, mass: 0.35 });
-  const smoothY = useSpring(pointerY, { stiffness: 150, damping: 24, mass: 0.35 });
-  const headX = useTransform(smoothX, [-1, 1], [-32, 32]);
-  const headY = useTransform(smoothY, [-1, 1], [-15, 15]);
-  const headRotateY = useTransform(smoothX, [-1, 1], [-13, 13]);
-  const headRotateX = useTransform(smoothY, [-1, 1], [7, -7]);
-  const headRotateZ = useTransform(smoothX, [-1, 1], [-1.6, 1.6]);
-  const glowX = useTransform(smoothX, [-1, 1], [-20, 20]);
-  const glowY = useTransform(smoothY, [-1, 1], [-10, 10]);
+  const smoothX = useSpring(pointerX, { stiffness: 105, damping: 22, mass: 0.75 });
+  const smoothY = useSpring(pointerY, { stiffness: 105, damping: 22, mass: 0.75 });
+  const headX = useTransform(smoothX, [-1, 1], [-12, 12]);
+  const headY = useTransform(smoothY, [-1, 1], [-8, 8]);
+  const headRotateY = useTransform(smoothX, [-1, 1], [-6, 6]);
+  const headRotateX = useTransform(smoothY, [-1, 1], [4, -4]);
+  const glowX = useTransform(smoothX, [-1, 1], [-7, 7]);
+  const glowY = useTransform(smoothY, [-1, 1], [-5, 5]);
 
   useEffect(() => {
     if (reduceMotion) {
@@ -107,6 +108,21 @@ function WelcomeIntro({
     };
   }, [reduceMotion]);
 
+  useEffect(() => {
+    if (reduceMotion) {
+      setCanTrackPointer(false);
+      return;
+    }
+
+    const pointerQuery = window.matchMedia("(hover: hover) and (pointer: fine)");
+    const updatePointerMode = () => setCanTrackPointer(pointerQuery.matches);
+
+    updatePointerMode();
+    pointerQuery.addEventListener("change", updatePointerMode);
+
+    return () => pointerQuery.removeEventListener("change", updatePointerMode);
+  }, [reduceMotion]);
+
   const copyEmail = async () => {
     try {
       await navigator.clipboard.writeText("harshitbhardwajhs@gmail.com");
@@ -118,22 +134,23 @@ function WelcomeIntro({
   };
 
   const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (reduceMotion) return;
+    if (reduceMotion || !canTrackPointer || event.pointerType !== "mouse") return;
     const rect = event.currentTarget.getBoundingClientRect();
-    pointerX.set(((event.clientX - rect.left) / rect.width - 0.5) * 2);
-    pointerY.set(((event.clientY - rect.top) / rect.height - 0.5) * 2);
+    const nextX = ((event.clientX - rect.left) / rect.width - 0.5) * 2;
+    const nextY = ((event.clientY - rect.top) / rect.height - 0.5) * 2;
+    pointerX.set(Math.max(-1, Math.min(1, nextX)));
+    pointerY.set(Math.max(-1, Math.min(1, nextY)));
   };
 
   const handlePointerLeave = () => {
     pointerX.set(0);
     pointerY.set(0);
+    setIsHeadActive(false);
   };
 
   return (
     <motion.div
       className="preintro-mainframe-intro absolute inset-0 z-30 overflow-hidden bg-[#D7D6D1] text-[#111111]"
-      onPointerMove={handlePointerMove}
-      onPointerLeave={handlePointerLeave}
       initial={reduceMotion ? false : { opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -246,12 +263,17 @@ function WelcomeIntro({
             animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
             transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
           >
-            <div className="preintro-photo-stage preintro-person-stage relative aspect-[0.86] w-[min(76vw,300px)] md:w-[min(44vw,430px)]">
+            <div
+              className="preintro-photo-stage preintro-person-stage relative aspect-[0.86] w-[min(76vw,300px)] md:w-[min(44vw,430px)]"
+              onPointerEnter={() => canTrackPointer && setIsHeadActive(true)}
+              onPointerMove={handlePointerMove}
+              onPointerLeave={handlePointerLeave}
+            >
               <motion.div
                 className="preintro-figure-aura absolute inset-[7%] rounded-full"
                 aria-hidden="true"
               />
-              <div className="absolute bottom-0 left-1/2 z-[2] w-[106%] -translate-x-1/2">
+              <div className="preintro-character-frame absolute bottom-0 left-1/2 z-[2] w-[106%] -translate-x-1/2">
                 <img
                   src="/media/intro-mainframe-body.png?v=1"
                   alt=""
@@ -259,20 +281,26 @@ function WelcomeIntro({
                   loading="eager"
                   draggable={false}
                 />
-              </div>
-              <div className="absolute bottom-0 left-1/2 z-[3] w-[106%] -translate-x-1/2">
                 <motion.img
-                  src="/media/intro-mainframe-head.png?v=1"
+                  src="/media/intro-mainframe-head.png?v=2"
                   alt="Retro monitor-headed portrait for Harshit Sharma"
-                  className="preintro-mainframe-head w-full select-none"
-                  style={reduceMotion ? undefined : { x: headX, y: headY, rotateX: headRotateX, rotateY: headRotateY, rotateZ: headRotateZ }}
+                  className="preintro-mainframe-head select-none"
+                  style={canTrackPointer && !reduceMotion ? { x: headX, y: headY, rotateX: headRotateX, rotateY: headRotateY } : undefined}
+                  animate={
+                    reduceMotion
+                      ? undefined
+                      : canTrackPointer
+                        ? { scale: isHeadActive ? 1.005 : 1 }
+                        : { y: [0, -3, 0] }
+                  }
+                  transition={canTrackPointer ? { duration: 0.3, ease: [0.16, 1, 0.3, 1] } : { duration: 4, repeat: Infinity, ease: "easeInOut" }}
                   loading="eager"
                   draggable={false}
                 />
               </div>
               <motion.span
                 className="preintro-screen-bloom"
-                style={reduceMotion ? undefined : { x: glowX, y: glowY }}
+                style={canTrackPointer && !reduceMotion ? { x: glowX, y: glowY } : undefined}
                 aria-hidden="true"
               />
               <div className="preintro-figure-shadow absolute bottom-[1%] left-1/2 z-[1] h-12 w-[78%] -translate-x-1/2 rounded-full bg-black/20 blur-2xl" />
