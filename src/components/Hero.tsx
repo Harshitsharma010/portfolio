@@ -73,11 +73,12 @@ function WelcomeIntro({
   const pointerY = useMotionValue(0);
   const smoothX = useSpring(pointerX, { stiffness: 150, damping: 24, mass: 0.35 });
   const smoothY = useSpring(pointerY, { stiffness: 150, damping: 24, mass: 0.35 });
-  const figureX = useTransform(smoothX, [-1, 1], [-24, 24]);
-  const figureY = useTransform(smoothY, [-1, 1], [-12, 12]);
-  const figureRotateY = useTransform(smoothX, [-1, 1], [-10, 10]);
-  const figureRotateX = useTransform(smoothY, [-1, 1], [5, -5]);
-  const glowX = useTransform(smoothX, [-1, 1], [-16, 16]);
+  const headX = useTransform(smoothX, [-1, 1], [-32, 32]);
+  const headY = useTransform(smoothY, [-1, 1], [-15, 15]);
+  const headRotateY = useTransform(smoothX, [-1, 1], [-13, 13]);
+  const headRotateX = useTransform(smoothY, [-1, 1], [7, -7]);
+  const headRotateZ = useTransform(smoothX, [-1, 1], [-1.6, 1.6]);
+  const glowX = useTransform(smoothX, [-1, 1], [-20, 20]);
   const glowY = useTransform(smoothY, [-1, 1], [-10, 10]);
 
   useEffect(() => {
@@ -241,7 +242,6 @@ function WelcomeIntro({
 
           <motion.div
             className="preintro-figure-shell relative mx-auto flex w-full max-w-[520px] items-center justify-center md:justify-end"
-            style={reduceMotion ? undefined : { rotateY: figureRotateY, rotateX: figureRotateX }}
             initial={reduceMotion ? false : { opacity: 0, y: 20, filter: "blur(8px)" }}
             animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
             transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
@@ -249,15 +249,23 @@ function WelcomeIntro({
             <div className="preintro-photo-stage preintro-person-stage relative aspect-[0.86] w-[min(76vw,300px)] md:w-[min(44vw,430px)]">
               <motion.div
                 className="preintro-figure-aura absolute inset-[7%] rounded-full"
-                style={reduceMotion ? undefined : { x: glowX, y: glowY }}
                 aria-hidden="true"
               />
               <div className="absolute bottom-0 left-1/2 z-[2] w-[106%] -translate-x-1/2">
+                <img
+                  src="/media/intro-mainframe-body.png?v=1"
+                  alt=""
+                  className="preintro-mainframe-body w-full select-none"
+                  loading="eager"
+                  draggable={false}
+                />
+              </div>
+              <div className="absolute bottom-0 left-1/2 z-[3] w-[106%] -translate-x-1/2">
                 <motion.img
-                  src="/media/intro-mainframe-person.png?v=2"
+                  src="/media/intro-mainframe-head.png?v=1"
                   alt="Retro monitor-headed portrait for Harshit Sharma"
-                  className="preintro-mainframe-person w-full select-none"
-                  style={reduceMotion ? undefined : { x: figureX, y: figureY }}
+                  className="preintro-mainframe-head w-full select-none"
+                  style={reduceMotion ? undefined : { x: headX, y: headY, rotateX: headRotateX, rotateY: headRotateY, rotateZ: headRotateZ }}
                   loading="eager"
                   draggable={false}
                 />
