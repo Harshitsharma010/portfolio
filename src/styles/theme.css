@@ -126,16 +126,37 @@ a {
 }
 
 .preintro-photo-stage {
-  animation: preintro-photo-float 6.5s ease-in-out infinite;
+  background: #c8c6c0;
+  transform-style: preserve-3d;
+  will-change: transform;
 }
 
 .preintro-person-stage {
   isolation: isolate;
+  transform-style: preserve-3d;
+}
+
+.preintro-figure-shell {
+  perspective: 900px;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.preintro-person-body {
+  clip-path: polygon(12% 9%, 88% 9%, 100% 100%, 0 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.4) 8%, #000 18%);
+  mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.4) 8%, #000 18%);
+  transform-origin: 50% 100%;
+  transform-style: preserve-3d;
+  will-change: transform;
+  filter: drop-shadow(0 18px 28px rgba(0, 0, 0, 0.16));
 }
 
 .preintro-monitor-head {
+  clip-path: polygon(2% 8%, 74% 8%, 96% 24%, 96% 75%, 78% 84%, 77% 100%, 25% 100%, 22% 86%, 2% 76%);
   transform-origin: 50% 80%;
-  transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  transform-style: preserve-3d;
+  will-change: transform;
   filter: drop-shadow(0 18px 22px rgba(0, 0, 0, 0.18));
 }
 
@@ -147,7 +168,8 @@ a {
   width: clamp(34px, 6vw, 58px);
   filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.32));
   transform-origin: 15% 15%;
-  transition: transform 160ms cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  will-change: transform;
 }
 
 .preintro-cursor-ring {
@@ -161,7 +183,8 @@ a {
   border: 1px solid rgba(17, 17, 17, 0.4);
   background: rgba(255, 255, 255, 0.38);
   box-shadow: 0 0 0 10px rgba(255, 255, 255, 0.18);
-  transition: transform 190ms cubic-bezier(0.16, 1, 0.3, 1), opacity 190ms ease;
+  pointer-events: none;
+  will-change: transform;
 }
 
 .silver-rule {
@@ -530,17 +553,6 @@ a {
   to {
     opacity: 1;
     transform: translate3d(0, 0, 0);
-  }
-}
-
-@keyframes preintro-photo-float {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0) rotate(-0.4deg);
-  }
-
-  50% {
-    transform: translate3d(0, -10px, 0) rotate(0.7deg);
   }
 }
 
