@@ -97,7 +97,7 @@ a {
 
 .intro-greeting {
   opacity: 0;
-  animation: greeting-fade 3.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: greeting-fade 1.65s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .preintro-cursor::after {
@@ -529,14 +529,14 @@ a {
     filter: blur(6px);
   }
 
-  9%,
-  25% {
+  12%,
+  58% {
     opacity: 1;
     transform: translate3d(0, 0, 0) scale(1);
     filter: blur(0);
   }
 
-  39%,
+  74%,
   100% {
     opacity: 0;
     transform: translate3d(0, -16px, 0) scale(1.02);

@@ -6,7 +6,7 @@ import RoleRotator from "./RoleRotator";
 
 const introGreetings = ["Hello", "Namaste", "Bonjour"];
 const PRE_INTRO_MS = 2200;
-const INTRO_MAX_MS = 2600;
+const INTRO_MAX_MS = 3600;
 const CLOUD_TRANSITION_MS = 480;
 const welcomeText = "Harshit Sharma builds deployable cloud, AI, and backend systems.";
 const heroSkills = ["AWS", "Docker", "Terraform", "CI/CD", "FastAPI", "AI/ML"];
@@ -48,7 +48,7 @@ function GreetingOverlay() {
           <span
             key={word}
             className="intro-greeting absolute inset-0 flex items-center justify-center px-6 font-display text-[clamp(3.8rem,10vw,8rem)] text-white drop-shadow-[0_18px_40px_rgba(0,0,0,0.8)]"
-            style={{ animationDelay: `${index * 1.05}s` }}
+            style={{ animationDelay: `${index * 0.95}s` }}
           >
             {word}
           </span>
