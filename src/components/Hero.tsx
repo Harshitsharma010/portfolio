@@ -67,11 +67,9 @@ function GreetingOverlay() {
 function WelcomeIntro({
   reduceMotion,
   onContinue,
-  onSkipTo,
 }: {
   reduceMotion: boolean | null;
   onContinue: () => void;
-  onSkipTo: (targetId: string) => void;
 }) {
   const [typedText, setTypedText] = useState(reduceMotion ? welcomeText : "");
   const [typingDone, setTypingDone] = useState(Boolean(reduceMotion));
@@ -221,22 +219,12 @@ function WelcomeIntro({
           <button type="button" onClick={onContinue} className="font-black tracking-[-0.04em]">
             Harshit Sharma <span className="text-black/45">*</span>
           </button>
-          <div className="hidden items-center gap-1 text-black/80 md:flex">
-            <button type="button" onClick={() => onSkipTo("projects")} className="transition-opacity hover:opacity-60">
-              Projects
-            </button>
+          <div className="hidden items-center gap-1 text-black/80 md:flex" aria-hidden="true">
+            <span>Cloud systems</span>
             <span>,</span>
-            <button type="button" onClick={() => onSkipTo("proof")} className="transition-opacity hover:opacity-60">
-              Proof
-            </button>
+            <span>AI tools</span>
             <span>,</span>
-            <button type="button" onClick={() => onSkipTo("skills")} className="transition-opacity hover:opacity-60">
-              Skills
-            </button>
-            <span>,</span>
-            <button type="button" onClick={() => onSkipTo("contact")} className="transition-opacity hover:opacity-60">
-              Contact
-            </button>
+            <span>deployable proof</span>
           </div>
           <button type="button" onClick={copyEmail} className="underline decoration-black/35 underline-offset-4 transition-opacity hover:opacity-65">
             {copied ? "Email copied" : "Get in touch"}
@@ -265,27 +253,10 @@ function WelcomeIntro({
             <div className={`preintro-source-actions${actionsVisible || typingDone ? " is-visible" : ""}`}>
               <button
                 type="button"
-                onClick={() => onSkipTo("projects")}
-                className="preintro-source-pill preintro-source-pill-light"
-              >
-                View Projects
-              </button>
-              <button
-                type="button"
-                onClick={() => onSkipTo("proof")}
-                className="preintro-source-pill preintro-source-pill-light"
-              >
-                See Live Proof
-              </button>
-              <button type="button" onClick={() => onSkipTo("skills")} className="preintro-source-pill preintro-source-pill-light">
-                Skills
-              </button>
-              <button
-                type="button"
                 onClick={onContinue}
                 className="preintro-source-pill preintro-source-pill-dark"
               >
-                Enter Portfolio
+                Start Experience
               </button>
               <button
                 type="button"
@@ -525,13 +496,6 @@ export default function Hero() {
       return phase;
     });
   };
-  const skipIntroTo = (targetId: string) => {
-    setIntroPhase("done");
-    window.setTimeout(() => {
-      document.getElementById(targetId)?.scrollIntoView({ block: "start" });
-    }, 40);
-  };
-
   useEffect(() => {
     if (reduceMotion) {
       setIntroPhase("done");
@@ -632,7 +596,6 @@ export default function Hero() {
             <WelcomeIntro
               reduceMotion={reduceMotion}
               onContinue={startTrainVideo}
-              onSkipTo={skipIntroTo}
             />
           ) : null}
           {introPhase === "video" ? (
