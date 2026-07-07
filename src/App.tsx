@@ -29,7 +29,7 @@ function App() {
   }, []);
 
   return (
-    <main className="overflow-x-clip bg-[#0C0C0C] font-body text-[#D7E2EA]">
+    <main className="bg-[#0C0C0C] font-body text-[#D7E2EA]">
       <ScrollProgress />
       <ProofRail />
       <Navbar />
