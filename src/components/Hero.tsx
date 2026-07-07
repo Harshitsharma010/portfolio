@@ -1,14 +1,16 @@
 import { useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion, useMotionValue, useReducedMotion, useScroll, useSpring, useTransform } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import type { MotionValue } from "framer-motion";
 import FadeIn from "./FadeIn";
 import RoleRotator from "./RoleRotator";
 
 const introGreetings = ["Hello", "Namaste", "Bonjour"];
-const PRE_INTRO_MS = 2200;
+const PRE_INTRO_MS = 4600;
 const INTRO_MAX_MS = 3600;
 const CLOUD_TRANSITION_MS = 480;
 const welcomeText = "Harshit Sharma builds deployable cloud, AI, and backend systems.";
+const MAINFRAME_VIDEO_SRC =
+  "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260530_042513_df96a13b-6155-4f6e-8b93-c9dee66fba08.mp4";
 const heroSkills = ["AWS", "Docker", "Terraform", "CI/CD", "FastAPI", "AI/ML"];
 const valueStatements = [
   "Deployable cloud systems",
@@ -40,6 +42,10 @@ const particles = [
   { x: 73, y: 76, s: 1.3, d: 1.85 },
 ];
 
+function clamp(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), max);
+}
+
 function GreetingOverlay() {
   return (
     <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center">
@@ -68,27 +74,23 @@ function WelcomeIntro({
   onSkipTo: (targetId: string) => void;
 }) {
   const [typedText, setTypedText] = useState(reduceMotion ? welcomeText : "");
+  const [typingDone, setTypingDone] = useState(Boolean(reduceMotion));
+  const [actionsVisible, setActionsVisible] = useState(Boolean(reduceMotion));
   const [copied, setCopied] = useState(false);
-  const [canTrackPointer, setCanTrackPointer] = useState(false);
-  const [isHeadActive, setIsHeadActive] = useState(false);
-  const pointerX = useMotionValue(0);
-  const pointerY = useMotionValue(0);
-  const smoothX = useSpring(pointerX, { stiffness: 105, damping: 22, mass: 0.75 });
-  const smoothY = useSpring(pointerY, { stiffness: 105, damping: 22, mass: 0.75 });
-  const headX = useTransform(smoothX, [-1, 1], [-12, 12]);
-  const headY = useTransform(smoothY, [-1, 1], [-8, 8]);
-  const headRotateY = useTransform(smoothX, [-1, 1], [-6, 6]);
-  const headRotateX = useTransform(smoothY, [-1, 1], [4, -4]);
-  const glowX = useTransform(smoothX, [-1, 1], [-7, 7]);
-  const glowY = useTransform(smoothY, [-1, 1], [-5, 5]);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const previousX = useRef<number | null>(null);
+  const targetTime = useRef(0);
+  const seeking = useRef(false);
 
   useEffect(() => {
     if (reduceMotion) {
       setTypedText(welcomeText);
+      setTypingDone(true);
       return;
     }
 
     setTypedText("");
+    setTypingDone(false);
     let index = 0;
     let typeTimer = 0;
     const startTimer = window.setTimeout(() => {
@@ -98,9 +100,10 @@ function WelcomeIntro({
 
         if (index >= welcomeText.length) {
           window.clearInterval(typeTimer);
+          setTypingDone(true);
         }
-      }, 34);
-    }, 260);
+      }, 28);
+    }, 420);
 
     return () => {
       window.clearTimeout(startTimer);
@@ -109,18 +112,9 @@ function WelcomeIntro({
   }, [reduceMotion]);
 
   useEffect(() => {
-    if (reduceMotion) {
-      setCanTrackPointer(false);
-      return;
-    }
-
-    const pointerQuery = window.matchMedia("(hover: hover) and (pointer: fine)");
-    const updatePointerMode = () => setCanTrackPointer(pointerQuery.matches);
-
-    updatePointerMode();
-    pointerQuery.addEventListener("change", updatePointerMode);
-
-    return () => pointerQuery.removeEventListener("change", updatePointerMode);
+    if (reduceMotion) return;
+    const timer = window.setTimeout(() => setActionsVisible(true), 900);
+    return () => window.clearTimeout(timer);
   }, [reduceMotion]);
 
   const copyEmail = async () => {
@@ -133,43 +127,101 @@ function WelcomeIntro({
     }
   };
 
-  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (reduceMotion || !canTrackPointer || event.pointerType !== "mouse") return;
-    const rect = event.currentTarget.getBoundingClientRect();
-    const nextX = ((event.clientX - rect.left) / rect.width - 0.5) * 2;
-    const nextY = ((event.clientY - rect.top) / rect.height - 0.5) * 2;
-    pointerX.set(Math.max(-1, Math.min(1, nextX)));
-    pointerY.set(Math.max(-1, Math.min(1, nextY)));
+  useEffect(() => {
+    if (reduceMotion) return;
+    const pointerQuery = window.matchMedia("(hover: hover) and (pointer: fine)");
+    if (!pointerQuery.matches) return;
+
+    const requestSeek = () => {
+      const video = videoRef.current;
+      if (!video || !Number.isFinite(video.duration) || video.duration <= 0 || seeking.current) return;
+      seeking.current = true;
+      video.currentTime = clamp(targetTime.current, 0, video.duration);
+    };
+
+    const handleMove = (event: MouseEvent) => {
+      const video = videoRef.current;
+      if (!video || !Number.isFinite(video.duration) || video.duration <= 0) {
+        previousX.current = event.clientX;
+        return;
+      }
+
+      if (previousX.current === null) {
+        previousX.current = event.clientX;
+        targetTime.current = video.currentTime;
+        return;
+      }
+
+      const delta = event.clientX - previousX.current;
+      previousX.current = event.clientX;
+      targetTime.current = clamp(targetTime.current + (delta / window.innerWidth) * video.duration * 0.85, 0, video.duration);
+      requestSeek();
+    };
+
+    window.addEventListener("mousemove", handleMove);
+    return () => window.removeEventListener("mousemove", handleMove);
+  }, [reduceMotion]);
+
+  const handleLoadedMetadata = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    const startAt = Number.isFinite(video.duration) ? Math.min(video.duration * 0.42, 1.4) : 0;
+    targetTime.current = startAt;
+    try {
+      video.currentTime = startAt;
+    } catch {
+      targetTime.current = 0;
+    }
   };
 
-  const handlePointerLeave = () => {
-    pointerX.set(0);
-    pointerY.set(0);
-    setIsHeadActive(false);
+  const handleSeeked = () => {
+    const video = videoRef.current;
+    if (!video) {
+      seeking.current = false;
+      return;
+    }
+
+    seeking.current = false;
+    if (Number.isFinite(video.duration) && Math.abs(video.currentTime - targetTime.current) > 0.04) {
+      seeking.current = true;
+      video.currentTime = clamp(targetTime.current, 0, video.duration);
+    }
   };
 
   return (
     <motion.div
-      className="preintro-mainframe-intro absolute inset-0 z-30 overflow-hidden bg-[#D7D6D1] text-[#111111]"
+      className="preintro-source-shell absolute inset-0 z-30 overflow-hidden bg-[#f4f2ec] text-[#111111]"
       initial={reduceMotion ? false : { opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
     >
-      <div className="preintro-paper-grain absolute inset-0" aria-hidden="true" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_34%,rgba(255,255,255,0.48),transparent_36%),radial-gradient(circle_at_22%_74%,rgba(217,184,111,0.2),transparent_28%)]" aria-hidden="true" />
+      <video
+        ref={videoRef}
+        className="preintro-source-video"
+        muted
+        playsInline
+        preload="auto"
+        onLoadedMetadata={handleLoadedMetadata}
+        onSeeked={handleSeeked}
+        aria-hidden="true"
+      >
+        <source src={MAINFRAME_VIDEO_SRC} type="video/mp4" />
+      </video>
+      <div className="preintro-source-wash" aria-hidden="true" />
+      <div className="preintro-source-grain" aria-hidden="true" />
 
-      <div className="relative z-10 mx-auto flex min-h-screen max-w-7xl flex-col px-5 py-5 sm:px-8 md:px-10">
+      <div className="relative z-10 mx-auto flex min-h-screen max-w-[1500px] flex-col px-5 py-5 sm:px-8 md:px-10">
         <motion.header
-          className="flex items-center justify-between gap-4 text-sm font-medium"
+          className="flex items-center justify-between gap-4 text-[0.95rem] font-medium text-black"
           initial={reduceMotion ? false : { opacity: 0, y: -14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
         >
-          <button type="button" onClick={onContinue} className="font-black tracking-[-0.035em]">
-            Harshit Sharma <span className="text-[#5D5B56]">*</span>
+          <button type="button" onClick={onContinue} className="font-black tracking-[-0.04em]">
+            Harshit Sharma <span className="text-black/45">*</span>
           </button>
-          <div className="hidden items-center gap-1 text-[#35332F] md:flex">
+          <div className="hidden items-center gap-1 text-black/80 md:flex">
             <button type="button" onClick={() => onSkipTo("projects")} className="transition-opacity hover:opacity-60">
               Projects
             </button>
@@ -187,129 +239,64 @@ function WelcomeIntro({
             </button>
           </div>
           <button type="button" onClick={copyEmail} className="underline decoration-black/35 underline-offset-4 transition-opacity hover:opacity-65">
-            Get in touch
+            {copied ? "Email copied" : "Get in touch"}
           </button>
         </motion.header>
 
-        <div className="grid flex-1 items-center gap-10 py-10 md:grid-cols-[0.95fr_1.05fr] md:py-0">
+        <section className="relative z-10 flex flex-1 flex-col justify-end pb-12 pt-20 md:justify-center md:pb-0">
           <motion.div
-            className="relative z-20 max-w-2xl"
+            className="preintro-source-copy max-w-[39rem]"
             initial={reduceMotion ? false : { opacity: 0, y: 20, filter: "blur(8px)" }}
             animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
             transition={{ duration: 0.72, ease: [0.16, 1, 0.3, 1] }}
           >
-            <div className="inline-flex rounded-full border border-black/10 bg-white/30 px-4 py-2 shadow-[0_1px_0_rgba(255,255,255,0.45)] backdrop-blur-xl">
-              <p className="text-sm leading-6 text-black/72 sm:text-base">
-                Hey there, initializing workspace.
-                <br />
-                Cloud systems, AI signals, and deployable proof.
-              </p>
-            </div>
+            <p className="preintro-source-label">
+              Hey there, I am Harshit.
+              <br />
+              Cloud / DevOps / AI engineer.
+            </p>
 
-            <h2 className="mt-7 min-h-[4.7em] text-[clamp(2.15rem,5vw,4.95rem)] font-black leading-[0.95] tracking-[-0.038em] text-[#111111] sm:min-h-[2.9em]">
+            <h2 className="preintro-source-type" aria-live="polite">
               <span className={typedText.length < welcomeText.length ? "preintro-cursor" : ""}>
                 {typedText}
               </span>
             </h2>
 
-            <div className="mt-7 flex flex-wrap gap-2.5">
+            <div className={`preintro-source-actions${actionsVisible || typingDone ? " is-visible" : ""}`}>
               <button
                 type="button"
                 onClick={() => onSkipTo("projects")}
-                className="preintro-pill rounded-full bg-white px-5 py-2.5 text-sm font-medium text-black shadow-[0_1px_0_rgba(0,0,0,0.08)] transition-colors hover:bg-black hover:text-white"
-                style={{ animationDelay: "0.7s" }}
+                className="preintro-source-pill preintro-source-pill-light"
               >
                 View Projects
               </button>
               <button
                 type="button"
                 onClick={() => onSkipTo("proof")}
-                className="preintro-pill rounded-full bg-white px-5 py-2.5 text-sm font-medium text-black shadow-[0_1px_0_rgba(0,0,0,0.08)] transition-colors hover:bg-black hover:text-white"
-                style={{ animationDelay: "0.8s" }}
+                className="preintro-source-pill preintro-source-pill-light"
               >
                 See Live Proof
               </button>
-              <a
-                href="/Harshit-Sharma-Resume.pdf"
-                target="_blank"
-                rel="noreferrer"
-                className="preintro-pill rounded-full bg-white px-5 py-2.5 text-sm font-medium text-black shadow-[0_1px_0_rgba(0,0,0,0.08)] transition-colors hover:bg-black hover:text-white"
-                style={{ animationDelay: "0.9s" }}
-              >
-                Open Resume
-              </a>
+              <button type="button" onClick={() => onSkipTo("skills")} className="preintro-source-pill preintro-source-pill-light">
+                Skills
+              </button>
               <button
                 type="button"
                 onClick={onContinue}
-                className="preintro-pill rounded-full border border-black/15 bg-black px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-white hover:text-black"
-                style={{ animationDelay: "1s" }}
+                className="preintro-source-pill preintro-source-pill-dark"
               >
                 Enter Portfolio
               </button>
               <button
                 type="button"
                 onClick={copyEmail}
-                className="preintro-pill rounded-full border border-black/15 bg-white/35 px-5 py-2.5 text-sm text-black/74 backdrop-blur-xl transition-colors hover:bg-white hover:text-black"
-                style={{ animationDelay: "1.1s" }}
+                className="preintro-source-pill preintro-source-pill-outline"
               >
                 {copied ? "Email copied" : "Reach me"}
               </button>
             </div>
           </motion.div>
-
-          <motion.div
-            className="preintro-figure-shell relative mx-auto flex w-full max-w-[520px] items-center justify-center md:justify-end"
-            initial={reduceMotion ? false : { opacity: 0, y: 20, filter: "blur(8px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <div
-              className="preintro-photo-stage preintro-person-stage relative aspect-[0.86] w-[min(76vw,300px)] md:w-[min(44vw,430px)]"
-              onPointerEnter={() => canTrackPointer && setIsHeadActive(true)}
-              onPointerMove={handlePointerMove}
-              onPointerLeave={handlePointerLeave}
-            >
-              <motion.div
-                className="preintro-figure-aura absolute inset-[7%] rounded-full"
-                aria-hidden="true"
-              />
-              <div className="preintro-character-frame absolute bottom-0 left-1/2 z-[2] w-[106%] -translate-x-1/2">
-                <img
-                  src="/media/intro-mainframe-body.png?v=1"
-                  alt=""
-                  className="preintro-mainframe-body w-full select-none"
-                  loading="eager"
-                  draggable={false}
-                />
-                <motion.img
-                  src="/media/intro-mainframe-head.png?v=2"
-                  alt="Retro monitor-headed portrait for Harshit Sharma"
-                  className="preintro-mainframe-head select-none"
-                  style={canTrackPointer && !reduceMotion ? { x: headX, y: headY, rotateX: headRotateX, rotateY: headRotateY } : undefined}
-                  animate={
-                    reduceMotion
-                      ? undefined
-                      : canTrackPointer
-                        ? { scale: isHeadActive ? 1.005 : 1 }
-                        : { y: [0, -3, 0] }
-                  }
-                  transition={canTrackPointer ? { duration: 0.3, ease: [0.16, 1, 0.3, 1] } : { duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                  loading="eager"
-                  draggable={false}
-                />
-              </div>
-              <motion.span
-                className="preintro-screen-bloom"
-                style={canTrackPointer && !reduceMotion ? { x: glowX, y: glowY } : undefined}
-                aria-hidden="true"
-              />
-              <div className="preintro-figure-shadow absolute bottom-[1%] left-1/2 z-[1] h-12 w-[78%] -translate-x-1/2 rounded-full bg-black/20 blur-2xl" />
-              <div className="absolute right-0 top-[14%] z-[3] rounded-full border border-black/10 bg-white/65 px-3 py-1.5 text-xs text-black/70 backdrop-blur-xl">
-                Cloud / DevOps / AI
-              </div>
-            </div>
-          </motion.div>
-        </div>
+        </section>
       </div>
     </motion.div>
   );
