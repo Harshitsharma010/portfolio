@@ -5,9 +5,9 @@ import FadeIn from "./FadeIn";
 import RoleRotator from "./RoleRotator";
 
 const introGreetings = ["Hello", "Namaste", "Bonjour"];
-const PRE_INTRO_MS = 5200;
-const INTRO_MAX_MS = 4300;
-const CLOUD_TRANSITION_MS = 720;
+const PRE_INTRO_MS = 2200;
+const INTRO_MAX_MS = 2600;
+const CLOUD_TRANSITION_MS = 480;
 const welcomeText = "Harshit Sharma builds deployable cloud, AI, and backend systems.";
 const heroSkills = ["AWS", "Docker", "Terraform", "CI/CD", "FastAPI", "AI/ML"];
 const valueStatements = [
@@ -607,10 +607,6 @@ export default function Hero() {
   useEffect(() => {
     if (introPhase === "done") return;
 
-    const bodyOverflow = document.body.style.overflow;
-    const htmlOverflow = document.documentElement.style.overflow;
-    document.body.style.overflow = "hidden";
-    document.documentElement.style.overflow = "hidden";
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
 
     const skipIntro = (event: Event) => {
@@ -628,8 +624,6 @@ export default function Hero() {
     window.addEventListener("keydown", skipIntroFromKey);
 
     return () => {
-      document.body.style.overflow = bodyOverflow;
-      document.documentElement.style.overflow = htmlOverflow;
       window.removeEventListener("wheel", skipIntro);
       window.removeEventListener("touchmove", skipIntro);
       window.removeEventListener("keydown", skipIntroFromKey);

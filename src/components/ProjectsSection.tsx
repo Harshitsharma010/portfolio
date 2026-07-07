@@ -19,7 +19,7 @@ function ProjectCard({ project, index, total }: { project: Project; index: numbe
   } as CSSProperties;
 
   return (
-    <div ref={ref} className="relative lg:h-[85vh]">
+    <div ref={ref} className="relative lg:h-[130vh]">
       <motion.article
         className={`border border-[#D7E2EA]/[0.18] bg-[#0C0C0C] p-5 text-[#D7E2EA] shadow-[0_26px_70px_rgba(0,0,0,0.42)] lg:sticky lg:top-[calc(6rem+var(--project-card-offset))] lg:max-h-[calc(100vh-7rem)] lg:overflow-hidden xl:top-[calc(8rem+var(--project-card-offset))] ${
           isFeatured ? "md:p-7" : "md:p-6"
@@ -158,7 +158,7 @@ export default function ProjectsSection() {
         </div>
       </div>
 
-      <div className="relative z-10 mx-auto grid max-w-7xl gap-5">
+      <div className="relative z-10 mx-auto grid max-w-7xl gap-5 lg:gap-0">
         {projects.map((project, index) => (
           <ProjectCard key={project.title} project={project} index={index} total={projects.length} />
         ))}
