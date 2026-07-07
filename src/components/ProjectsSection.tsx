@@ -1,6 +1,6 @@
 import { Code2, ExternalLink } from "lucide-react";
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
-import { useRef } from "react";
+import { type CSSProperties, useRef } from "react";
 import FadeIn from "./FadeIn";
 import { projects, type Project } from "../data/sections";
 
@@ -12,26 +12,23 @@ function ProjectCard({ project, index, total }: { project: Project; index: numbe
     target: ref,
     offset: ["start 0.78", "end 0.22"],
   });
-  const targetScale = 1 - (total - 1 - index) * 0.026;
-  const scale = useTransform(scrollYProgress, [0, 0.58, 1], [1, 1, targetScale]);
-  const y = useTransform(scrollYProgress, [0, 0.52, 1], [0, 0, -42 - index * 12]);
-  const opacity = useTransform(scrollYProgress, [0, 0.78, 1], [1, 1, 0.82]);
-  const filter = useTransform(scrollYProgress, [0, 0.72, 1], ["blur(0px)", "blur(0px)", "blur(2px)"]);
+  const targetScale = 1 - (total - 1 - index) * 0.03;
+  const scale = useTransform(scrollYProgress, [0, 1], [1, targetScale]);
+  const cardStyle = {
+    "--project-card-offset": `${index * 28}px`,
+  } as CSSProperties;
 
   return (
-    <div ref={ref} className="relative lg:h-[112vh]">
+    <div ref={ref} className="relative lg:h-[85vh]">
       <motion.article
-        className={`border border-[#D7E2EA]/[0.18] bg-[#0C0C0C] p-5 text-[#D7E2EA] shadow-[0_26px_70px_rgba(0,0,0,0.42)] lg:sticky lg:max-h-[calc(100vh-7rem)] lg:overflow-hidden ${
+        className={`border border-[#D7E2EA]/[0.18] bg-[#0C0C0C] p-5 text-[#D7E2EA] shadow-[0_26px_70px_rgba(0,0,0,0.42)] lg:sticky lg:top-[calc(6rem+var(--project-card-offset))] lg:max-h-[calc(100vh-7rem)] lg:overflow-hidden xl:top-[calc(8rem+var(--project-card-offset))] ${
           isFeatured ? "md:p-7" : "md:p-6"
         }`}
         style={{
-          top: `${86 + index * 14}px`,
+          ...cardStyle,
           scale: reduceMotion ? 1 : scale,
-          y: reduceMotion ? 0 : y,
-          opacity: reduceMotion ? 1 : opacity,
-          filter: reduceMotion ? "none" : filter,
-          zIndex: total - index,
-          transformOrigin: "50% 100%",
+          zIndex: index + 1,
+          transformOrigin: "50% 0%",
         }}
       >
       <div className="grid gap-8 lg:grid-cols-[0.46fr_0.54fr]">
