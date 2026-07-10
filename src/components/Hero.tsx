@@ -13,26 +13,9 @@ const CLOUD_TRANSITION_MS = 1450;
 const welcomeText = "Harshit Sharma builds deployable cloud, AI, and backend systems.";
 const MAINFRAME_VIDEO_SRC =
   "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260530_042513_df96a13b-6155-4f6e-8b93-c9dee66fba08.mp4";
-const INTRO_STORAGE_KEY = "harshit-intro-seen";
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
-}
-
-function hasSeenIntro() {
-  try {
-    return window.localStorage.getItem(INTRO_STORAGE_KEY) === "true";
-  } catch {
-    return false;
-  }
-}
-
-function markIntroSeen() {
-  try {
-    window.localStorage.setItem(INTRO_STORAGE_KEY, "true");
-  } catch {
-    // Storage can be unavailable in strict privacy modes; the intro still completes normally.
-  }
 }
 
 function GreetingOverlay() {
@@ -412,13 +395,13 @@ export default function Hero() {
   const [introPhase, setIntroPhase] = useState<"welcome" | "video" | "clouds" | "done">(
     () => {
       if (typeof window === "undefined") return "welcome";
-      if (window.location.hash || hasSeenIntro() || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return "done";
+      const hasSectionDeepLink = Boolean(window.location.hash && window.location.hash !== "#home");
+      if (hasSectionDeepLink || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return "done";
       return "welcome";
     },
   );
   const [introVideoReady, setIntroVideoReady] = useState(false);
   const finishIntro = useCallback(() => {
-    markIntroSeen();
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
     setIntroPhase("done");
   }, []);
