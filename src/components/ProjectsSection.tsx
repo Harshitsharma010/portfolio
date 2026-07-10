@@ -4,6 +4,8 @@ import { type CSSProperties, useRef } from "react";
 import FadeIn from "./FadeIn";
 import { projects, type Project } from "../data/sections";
 
+const projectAccents = ["255, 45, 107", "229, 199, 122", "215, 226, 234", "184, 78, 142"];
+
 function ProjectCard({ project, index, total }: { project: Project; index: number; total: number }) {
   const ref = useRef<HTMLDivElement | null>(null);
   const reduceMotion = useReducedMotion();
@@ -16,12 +18,13 @@ function ProjectCard({ project, index, total }: { project: Project; index: numbe
   const scale = useTransform(scrollYProgress, [0, 1], [1, targetScale]);
   const cardStyle = {
     "--project-card-offset": `${index * 28}px`,
+    "--project-accent": projectAccents[index % projectAccents.length],
   } as CSSProperties;
 
   return (
     <div ref={ref} className={`relative lg:h-[130vh] ${index > 0 ? "lg:-mt-[42vh]" : ""}`}>
       <motion.article
-        className={`border border-[#D7E2EA]/[0.18] bg-[#0C0C0C] p-5 text-[#D7E2EA] shadow-[0_26px_70px_rgba(0,0,0,0.42)] lg:sticky lg:top-[calc(6rem+var(--project-card-offset))] lg:max-h-[calc(100vh-7rem)] lg:overflow-hidden xl:top-[calc(8rem+var(--project-card-offset))] ${
+        className={`project-case-card group relative border border-[#D7E2EA]/[0.18] p-5 text-[#D7E2EA] shadow-[0_26px_70px_rgba(0,0,0,0.42)] lg:sticky lg:top-[calc(6rem+var(--project-card-offset))] lg:max-h-[calc(100vh-7rem)] lg:overflow-hidden xl:top-[calc(8rem+var(--project-card-offset))] ${
           isFeatured ? "md:p-7" : "md:p-6"
         }`}
         style={{
@@ -31,7 +34,11 @@ function ProjectCard({ project, index, total }: { project: Project; index: numbe
           transformOrigin: "50% 0%",
         }}
       >
-      <div className="grid gap-8 lg:grid-cols-[0.46fr_0.54fr]">
+      <div className="project-card-atmosphere pointer-events-none absolute inset-0" aria-hidden="true" />
+      <div className="project-card-signal pointer-events-none absolute right-8 top-7 hidden w-52 lg:block" aria-hidden="true">
+        <span /><span /><span /><i />
+      </div>
+      <div className="relative z-10 grid gap-8 lg:grid-cols-[0.46fr_0.54fr]">
         <div className="flex min-h-full flex-col justify-between gap-8">
           <div>
             <div className="flex items-center justify-between gap-5 border-b border-[#D7E2EA]/[0.16] pb-5">

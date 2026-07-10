@@ -1,14 +1,33 @@
 import { motion, useScroll } from "framer-motion";
+import { useEffect, useState } from "react";
 
 const nodes = ["Hero", "Snapshot", "Proof", "Projects", "Skills", "Contact"];
 
 export default function ProofRail() {
   const { scrollYProgress } = useScroll();
+  const [proofIsActive, setProofIsActive] = useState(
+    () => typeof window !== "undefined" && window.location.hash === "#proof",
+  );
+
+  useEffect(() => {
+    const proofSection = document.getElementById("proof");
+    if (!proofSection) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setProofIsActive(entry.isIntersecting),
+      { rootMargin: "-12% 0px -12% 0px", threshold: 0 },
+    );
+
+    observer.observe(proofSection);
+    return () => observer.disconnect();
+  }, []);
 
   return (
-    <div
+    <motion.div
       className="pointer-events-none fixed left-5 top-1/2 z-30 hidden h-[58vh] -translate-y-1/2 lg:block"
       aria-hidden="true"
+      animate={{ opacity: proofIsActive ? 0 : 1, x: proofIsActive ? -12 : 0 }}
+      transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
     >
       <div className="relative h-full w-8">
         <div className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-white/[0.08]" />
@@ -24,6 +43,6 @@ export default function ProofRail() {
           />
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 }

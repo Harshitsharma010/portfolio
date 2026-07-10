@@ -1,4 +1,4 @@
-import { Code2, FileDown, Mail, Network } from "lucide-react";
+import { Code2, Mail, Network } from "lucide-react";
 import { useState } from "react";
 import FadeIn from "./FadeIn";
 
@@ -7,7 +7,6 @@ const links = [
   { label: "Email", value: email, href: `mailto:${email}`, icon: Mail },
   { label: "GitHub", value: "github.com/Harshitsharma010", href: "https://github.com/Harshitsharma010", icon: Code2 },
   { label: "LinkedIn", value: "linkedin.com/in/harshitsharma624", href: "https://www.linkedin.com/in/harshitsharma624", icon: Network },
-  { label: "Resume", value: "Download PDF", href: "/Harshit-Sharma-Resume.pdf", icon: FileDown },
 ];
 
 export default function ContactSection() {
@@ -44,7 +43,7 @@ export default function ContactSection() {
             Let's build something useful.
           </h2>
           <p className="mt-8 max-w-2xl text-base font-light leading-7 text-[#D7E2EA]/[0.7] sm:text-lg">
-            I am looking for Cloud Engineering, Junior DevOps, Backend, AI/ML, or security-focused software roles where shipping, documenting, and improving systems matters.
+            I am looking for Cloud Engineering, Junior DevOps, Infrastructure, or Technical Consulting roles where shipping, troubleshooting, documenting, and improving systems matters.
           </p>
         </FadeIn>
 

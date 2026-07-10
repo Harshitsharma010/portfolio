@@ -56,7 +56,7 @@ export default function SkillsSection() {
     >
       <div className="film-grain pointer-events-none absolute inset-0 opacity-30" aria-hidden="true" />
       <div
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.11),transparent_34%),radial-gradient(circle_at_12%_42%,rgba(255,255,255,0.055),transparent_30%),linear-gradient(180deg,#0C0C0C_0%,#121212_48%,#0C0C0C_100%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_82%_8%,rgba(255,45,107,0.07),transparent_30%),radial-gradient(circle_at_50%_0%,rgba(229,199,122,0.1),transparent_34%),radial-gradient(circle_at_12%_42%,rgba(255,255,255,0.045),transparent_30%),linear-gradient(180deg,#0C0C0C_0%,#141014_48%,#0C0C0C_100%)]"
         aria-hidden="true"
       />
 

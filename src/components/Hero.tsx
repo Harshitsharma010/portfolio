@@ -1,49 +1,38 @@
-import { useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import type { MotionValue } from "framer-motion";
 import FadeIn from "./FadeIn";
 import RoleRotator from "./RoleRotator";
 
+const StormCore = lazy(() => import("./StormCore"));
+
 const introGreetings = ["Hello", "Namaste", "Bonjour"];
-const PRE_INTRO_MS = 4600;
-const INTRO_MAX_MS = 3600;
-const CLOUD_TRANSITION_MS = 480;
+const PRE_INTRO_MS = 5400;
+const INTRO_MAX_MS = 5600;
+const CLOUD_TRANSITION_MS = 1450;
 const welcomeText = "Harshit Sharma builds deployable cloud, AI, and backend systems.";
 const MAINFRAME_VIDEO_SRC =
   "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260530_042513_df96a13b-6155-4f6e-8b93-c9dee66fba08.mp4";
-const heroSkills = ["AWS", "Docker", "Terraform", "CI/CD", "FastAPI", "AI/ML"];
-const valueStatements = [
-  "Deployable cloud systems",
-  "Backend APIs with live proof",
-  "AI pipelines with documented tradeoffs",
-  "Infrastructure with CI/CD, logs, and inspection paths",
-];
-
-const particles = [
-  { x: 12, y: 18, s: 2, d: 0 },
-  { x: 22, y: 72, s: 1.5, d: 0.3 },
-  { x: 34, y: 28, s: 1.8, d: 0.6 },
-  { x: 46, y: 12, s: 1.2, d: 0.1 },
-  { x: 58, y: 82, s: 2, d: 0.5 },
-  { x: 72, y: 24, s: 1.4, d: 0.2 },
-  { x: 84, y: 66, s: 1.7, d: 0.7 },
-  { x: 18, y: 48, s: 1.1, d: 0.4 },
-  { x: 79, y: 42, s: 1.2, d: 0.9 },
-  { x: 41, y: 67, s: 1.5, d: 0.8 },
-  { x: 63, y: 55, s: 1, d: 0.25 },
-  { x: 30, y: 88, s: 1.3, d: 0.65 },
-  { x: 8, y: 58, s: 1.1, d: 1.1 },
-  { x: 52, y: 34, s: 1.2, d: 1.25 },
-  { x: 88, y: 18, s: 1.5, d: 1.35 },
-  { x: 91, y: 51, s: 1.1, d: 1.45 },
-  { x: 67, y: 11, s: 1, d: 1.55 },
-  { x: 26, y: 37, s: 1.2, d: 1.65 },
-  { x: 47, y: 92, s: 1, d: 1.75 },
-  { x: 73, y: 76, s: 1.3, d: 1.85 },
-];
+const INTRO_STORAGE_KEY = "harshit-intro-seen";
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
+}
+
+function hasSeenIntro() {
+  try {
+    return window.localStorage.getItem(INTRO_STORAGE_KEY) === "true";
+  } catch {
+    return false;
+  }
+}
+
+function markIntroSeen() {
+  try {
+    window.localStorage.setItem(INTRO_STORAGE_KEY, "true");
+  } catch {
+    // Storage can be unavailable in strict privacy modes; the intro still completes normally.
+  }
 }
 
 function GreetingOverlay() {
@@ -54,7 +43,7 @@ function GreetingOverlay() {
           <span
             key={word}
             className="intro-greeting absolute inset-0 flex items-center justify-center px-6 font-display text-[clamp(3.8rem,10vw,8rem)] text-white drop-shadow-[0_18px_40px_rgba(0,0,0,0.8)]"
-            style={{ animationDelay: `${index * 0.95}s` }}
+            style={{ animationDelay: `${index * 1.28}s` }}
           >
             {word}
           </span>
@@ -191,8 +180,8 @@ function WelcomeIntro({
       className="preintro-source-shell absolute inset-0 z-30 overflow-hidden bg-[#f4f2ec] text-[#111111]"
       initial={reduceMotion ? false : { opacity: 0 }}
       animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
+      exit={{ opacity: 0, scale: 1.025, filter: "blur(10px)" }}
+      transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
     >
       <video
         ref={videoRef}
@@ -273,41 +262,6 @@ function WelcomeIntro({
   );
 }
 
-function ValueStrip() {
-  const [index, setIndex] = useState(0);
-  const reduceMotion = useReducedMotion();
-
-  useEffect(() => {
-    if (reduceMotion) return;
-    const timer = window.setInterval(() => {
-      setIndex((current) => (current + 1) % valueStatements.length);
-    }, 2400);
-
-    return () => window.clearInterval(timer);
-  }, [reduceMotion]);
-
-  if (reduceMotion) {
-    return <span>{valueStatements[0]}</span>;
-  }
-
-  return (
-    <span className="relative inline-flex min-h-[1.5em] min-w-[min(25rem,86vw)] overflow-hidden align-bottom">
-      <AnimatePresence mode="wait">
-        <motion.span
-          key={valueStatements[index]}
-          className="absolute inset-0"
-          initial={{ opacity: 0, y: 12, filter: "blur(5px)" }}
-          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-          exit={{ opacity: 0, y: -12, filter: "blur(5px)" }}
-          transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
-        >
-          {valueStatements[index]}
-        </motion.span>
-      </AnimatePresence>
-    </span>
-  );
-}
-
 function MagneticGalaxy({
   reduceMotion,
   scrollY,
@@ -344,10 +298,17 @@ function MagneticGalaxy({
   return (
     <motion.div
       className="magnetic-galaxy group relative mx-auto aspect-square w-[min(82vw,540px)]"
-      style={{ y: reduceMotion ? 0 : scrollY, scale: reduceMotion ? 1 : scrollScale, opacity: reduceMotion ? 1 : scrollOpacity }}
+      style={{
+        y: reduceMotion ? 0 : scrollY,
+        scale: reduceMotion ? 1 : scrollScale,
+        opacity: reduceMotion ? 1 : scrollOpacity,
+      }}
       onPointerEnter={() => setIsActive(true)}
       onPointerMove={handlePointerMove}
-      onPointerLeave={() => setIsActive(false)}
+      onPointerLeave={() => {
+        setIsActive(false);
+        setCursor({ x: 0, y: 0 });
+      }}
     >
       <motion.div
         className="galaxy-glow absolute inset-[8%] rounded-full"
@@ -356,23 +317,27 @@ function MagneticGalaxy({
         transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
       />
       <motion.div
-        className="astral-dust absolute inset-0 rounded-full"
-        aria-hidden="true"
-        animate={reduceMotion ? {} : { x: isActive ? cursor.x * -5 : 0, y: isActive ? cursor.y * -5 : 0 }}
-        transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-      />
-      <motion.div
-        className="galaxy-ripple galaxy-ripple-a absolute inset-[10%] rounded-full"
+        className="galaxy-ripple absolute inset-[10%] rounded-full"
         aria-hidden="true"
         initial={reduceMotion ? false : { opacity: 0, scale: 0.66 }}
-        animate={reduceMotion ? {} : { opacity: ignited ? 1 : 0, scale: ignited ? 1 : 0.66, x: isActive ? cursor.x * 5 : 0, y: isActive ? cursor.y * 5 : 0 }}
+        animate={{
+          opacity: ignited ? 1 : 0,
+          scale: ignited ? 1 : 0.66,
+          x: isActive ? cursor.x * 5 : 0,
+          y: isActive ? cursor.y * 5 : 0,
+        }}
         transition={{ duration: 1.25, ease: [0.16, 1, 0.3, 1] }}
       />
       <motion.div
         className="galaxy-ripple galaxy-ripple-b absolute inset-[20%] rounded-full"
         aria-hidden="true"
         initial={reduceMotion ? false : { opacity: 0, scale: 0.72 }}
-        animate={reduceMotion ? {} : { opacity: ignited ? 1 : 0, scale: ignited ? 1 : 0.72, x: isActive ? cursor.x * -4 : 0, y: isActive ? cursor.y * -4 : 0 }}
+        animate={{
+          opacity: ignited ? 1 : 0,
+          scale: ignited ? 1 : 0.72,
+          x: isActive ? cursor.x * -4 : 0,
+          y: isActive ? cursor.y * -4 : 0,
+        }}
         transition={{ duration: 1.45, delay: 0.12, ease: [0.16, 1, 0.3, 1] }}
       />
       <motion.span
@@ -382,10 +347,6 @@ function MagneticGalaxy({
         animate={reduceMotion ? {} : { opacity: [0, 0.85, 0], scale: [0.24, 1.05, 1.42] }}
         transition={{ duration: 1.35, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
       />
-      <span className="shooting-star shooting-star-a" aria-hidden="true" />
-      <span className="shooting-star shooting-star-b" aria-hidden="true" />
-      <span className="shooting-star shooting-star-c" aria-hidden="true" />
-
       <motion.svg
         className="pointer-events-none absolute inset-0 h-full w-full opacity-70"
         viewBox="0 0 100 100"
@@ -397,53 +358,21 @@ function MagneticGalaxy({
         <path className="constellation-line constellation-line-soft" d="M22 72 L41 67 L58 82" />
       </motion.svg>
 
-      {particles.map((particle, index) => (
-        <motion.span
-          key={`${particle.x}-${particle.y}`}
-          className="galaxy-particle absolute rounded-full bg-white"
-          style={{
-            left: `${particle.x}%`,
-            top: `${particle.y}%`,
-            width: particle.s,
-            height: particle.s,
-          }}
-          animate={
-            reduceMotion
-              ? {}
-              : {
-                  x: isActive ? (50 - particle.x) * 1.45 + cursor.x * 2 : [0, index % 2 === 0 ? 4 : -3, 0],
-                  y: isActive ? (50 - particle.y) * 1.45 + cursor.y * 2 : [0, index % 3 === 0 ? -5 : 4, 0],
-                  opacity: isActive ? 0.92 : [0.28, 0.86, 0.36],
-                }
-          }
-          initial={reduceMotion ? false : { x: (particle.x - 50) * 0.46, y: (particle.y - 50) * 0.46, opacity: 0 }}
-          transition={{ duration: isActive ? 0.55 : 3.8 + particle.d, repeat: isActive ? 0 : Infinity, ease: "easeInOut", delay: particle.d }}
-        />
-      ))}
-
       <motion.span
         className="galaxy-node galaxy-node-a"
         animate={reduceMotion ? {} : { rotate: isActive ? 22 : [0, 360] }}
         transition={{ duration: isActive ? 0.6 : 18, repeat: isActive ? 0 : Infinity, ease: "linear" }}
-      >
-        <span />
-      </motion.span>
+      ><span /></motion.span>
       <motion.span
         className="galaxy-node galaxy-node-b"
         animate={reduceMotion ? {} : { rotate: isActive ? -18 : [360, 0] }}
         transition={{ duration: isActive ? 0.6 : 22, repeat: isActive ? 0 : Infinity, ease: "linear" }}
-      >
-        <span />
-      </motion.span>
+      ><span /></motion.span>
       <motion.span
         className="galaxy-node galaxy-node-c"
         animate={reduceMotion ? {} : { rotate: isActive ? 14 : [0, 360] }}
         transition={{ duration: isActive ? 0.6 : 28, repeat: isActive ? 0 : Infinity, ease: "linear" }}
-      >
-        <span />
-      </motion.span>
-      <span className="galaxy-planet galaxy-planet-a" aria-hidden="true" />
-      <span className="galaxy-planet galaxy-planet-b" aria-hidden="true" />
+      ><span /></motion.span>
       <motion.div
         className="galaxy-proof-card"
         initial={reduceMotion ? false : { opacity: 0, y: 18, filter: "blur(8px)" }}
@@ -454,7 +383,11 @@ function MagneticGalaxy({
         <strong>AWS / Docker / Terraform / CI/CD / logs</strong>
       </motion.div>
 
-      <div className="galaxy-core-wrap">
+      <motion.div
+        className="galaxy-core-wrap"
+        animate={reduceMotion ? {} : { x: isActive ? cursor.x * 10 : 0, y: isActive ? cursor.y * 8 : 0 }}
+        transition={{ duration: 0.48, ease: [0.16, 1, 0.3, 1] }}
+      >
         <div className="galaxy-core relative aspect-square overflow-hidden rounded-full border border-white/35 bg-white/[0.06] p-2 backdrop-blur-xl">
           <img
             src="https://github.com/Harshitsharma010.png"
@@ -463,7 +396,7 @@ function MagneticGalaxy({
             loading="eager"
           />
         </div>
-      </div>
+      </motion.div>
     </motion.div>
   );
 }
@@ -472,35 +405,35 @@ export default function Hero() {
   const introVideoRef = useRef<HTMLVideoElement | null>(null);
   const heroRef = useRef<HTMLElement | null>(null);
   const reduceMotion = useReducedMotion();
-  const { scrollYProgress } = useScroll({
-    target: heroRef,
-    offset: ["start start", "end start"],
-  });
+  const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
   const galaxyY = useTransform(scrollYProgress, [0, 1], [0, -70]);
   const galaxyScale = useTransform(scrollYProgress, [0, 1], [1, 0.92]);
   const galaxyOpacity = useTransform(scrollYProgress, [0, 0.84, 1], [1, 0.72, 0.22]);
   const [introPhase, setIntroPhase] = useState<"welcome" | "video" | "clouds" | "done">(
-    reduceMotion ? "done" : "welcome",
+    () => {
+      if (typeof window === "undefined") return "welcome";
+      if (window.location.hash || hasSeenIntro() || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return "done";
+      return "welcome";
+    },
   );
   const [introVideoReady, setIntroVideoReady] = useState(false);
+  const finishIntro = useCallback(() => {
+    markIntroSeen();
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    setIntroPhase("done");
+  }, []);
+  const introActive = introPhase !== "done";
   const startTrainVideo = () => {
     setIntroPhase((phase) => (phase === "welcome" ? "video" : phase));
   };
   const startIntroTransition = () => {
     setIntroPhase((phase) => (phase === "video" ? "clouds" : phase));
   };
-  const advanceIntro = () => {
-    setIntroPhase((phase) => {
-      if (phase === "welcome") return "video";
-      if (phase === "video") return "clouds";
-      return phase;
-    });
-  };
   useEffect(() => {
     if (reduceMotion) {
-      setIntroPhase("done");
+      finishIntro();
     }
-  }, [reduceMotion]);
+  }, [reduceMotion, finishIntro]);
 
   useEffect(() => {
     if (introPhase !== "welcome") return;
@@ -511,9 +444,9 @@ export default function Hero() {
   useEffect(() => {
     if (introPhase !== "clouds") return;
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-    const timer = window.setTimeout(() => setIntroPhase("done"), CLOUD_TRANSITION_MS);
+    const timer = window.setTimeout(finishIntro, CLOUD_TRANSITION_MS);
     return () => window.clearTimeout(timer);
-  }, [introPhase]);
+  }, [introPhase, finishIntro]);
 
   useEffect(() => {
     if (introPhase === "video") {
@@ -556,100 +489,120 @@ export default function Hero() {
   }, [introPhase]);
 
   useEffect(() => {
-    if (introPhase === "done") return;
+    if (!introActive) return;
 
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
 
-    const skipIntro = (event: Event) => {
+    const lockIntroScroll = (event: Event) => {
       event.preventDefault();
-      advanceIntro();
-    };
-    const skipIntroFromKey = (event: KeyboardEvent) => {
-      const keys = ["ArrowDown", "PageDown", " ", "Spacebar", "Enter"];
-      if (!keys.includes(event.key)) return;
-      skipIntro(event);
     };
 
-    window.addEventListener("wheel", skipIntro, { passive: false });
-    window.addEventListener("touchmove", skipIntro, { passive: false });
-    window.addEventListener("keydown", skipIntroFromKey);
+    window.addEventListener("wheel", lockIntroScroll, { passive: false });
+    window.addEventListener("touchmove", lockIntroScroll, { passive: false });
 
     return () => {
-      window.removeEventListener("wheel", skipIntro);
-      window.removeEventListener("touchmove", skipIntro);
-      window.removeEventListener("keydown", skipIntroFromKey);
+      window.removeEventListener("wheel", lockIntroScroll);
+      window.removeEventListener("touchmove", lockIntroScroll);
+      document.body.style.overflow = previousBodyOverflow;
+      document.documentElement.style.overflow = previousHtmlOverflow;
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
     };
-  }, [introPhase]);
+  }, [introActive]);
 
   return (
-    <section ref={heroRef} id="home" className="relative flex min-h-screen w-full flex-col overflow-hidden bg-[#0C0C0C] text-[#D7E2EA]">
+    <section ref={heroRef} id="home" className="relative flex min-h-screen w-full flex-col overflow-hidden bg-[#09060B] text-[#D7E2EA]">
+      <AnimatePresence>
       {introPhase !== "done" ? (
         <motion.div
-          className="fixed inset-0 z-40 bg-[#0C0C0C]"
+          className="fixed inset-0 z-40 overflow-hidden bg-[#0C0C0C]"
           initial={{ opacity: 1 }}
-          animate={{ opacity: introPhase === "clouds" ? 0.92 : 1 }}
-          transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
-          exit={{ opacity: 0 }}
-          aria-hidden="true"
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          exit={{ opacity: 0, filter: "blur(12px)" }}
+          role="region"
+          aria-label="Cinematic portfolio introduction"
         >
+          <button
+            type="button"
+            onClick={finishIntro}
+            className="absolute right-5 top-5 z-50 rounded-full border border-white/25 bg-black/35 px-4 py-2 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-white backdrop-blur-md transition-colors hover:border-white/55 hover:bg-black/55 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:right-8 sm:top-7"
+          >
+            Skip intro
+          </button>
+          <motion.div
+            className="absolute inset-0"
+            initial={false}
+            animate={{
+              opacity: introPhase === "video" ? 1 : 0,
+              scale: introPhase === "video" ? 1 : 1.035,
+              filter: introPhase === "video" ? "blur(0px)" : "blur(8px)",
+            }}
+            transition={{ duration: 1.05, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <video
+              ref={introVideoRef}
+              className="h-full w-full bg-[#0C0C0C] object-cover object-center"
+              src="/media/intro-hero-20260703.mp4"
+              muted
+              playsInline
+              preload="auto"
+              onPlaying={() => setIntroVideoReady(true)}
+              onEnded={startIntroTransition}
+              onError={startIntroTransition}
+            />
+            <div className="absolute inset-0 bg-black/25" />
+            <div className="intro-vignette absolute inset-0" />
+            <div className="film-grain pointer-events-none absolute inset-0 opacity-45" aria-hidden="true" />
+            <div className="intro-letterbox pointer-events-none absolute inset-0" aria-hidden="true" />
+            {introVideoReady && introPhase === "video" ? <GreetingOverlay /> : null}
+          </motion.div>
+
+          <AnimatePresence>
           {introPhase === "welcome" ? (
             <WelcomeIntro
               reduceMotion={reduceMotion}
               onContinue={startTrainVideo}
             />
           ) : null}
-          {introPhase === "video" ? (
-            <>
-              <video
-                ref={introVideoRef}
-                className="h-full w-full bg-[#0C0C0C] object-cover object-center"
-                src="/media/intro-hero-20260703.mp4"
-                muted
-                playsInline
-                autoPlay
-                preload="auto"
-                onPlaying={() => setIntroVideoReady(true)}
-                onEnded={startIntroTransition}
-                onError={startIntroTransition}
-              />
-              <div className="absolute inset-0 bg-black/25" />
-              <div className="intro-vignette absolute inset-0" />
-              <div className="film-grain pointer-events-none absolute inset-0 opacity-45" aria-hidden="true" />
-              <div className="intro-letterbox pointer-events-none absolute inset-0" aria-hidden="true" />
-              {introVideoReady ? <GreetingOverlay /> : null}
-            </>
-          ) : null}
+          </AnimatePresence>
           <motion.div
-            className="absolute inset-0 bg-[#0C0C0C]"
+            className="pointer-events-none absolute inset-0 bg-[#030308]"
             initial={{ opacity: 0 }}
-            animate={{ opacity: introPhase === "clouds" ? 0.42 : 0 }}
-            transition={{ duration: 0.45 }}
+            animate={{ opacity: introPhase === "clouds" ? 0.78 : 0 }}
+            transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
           />
           <motion.div
-            className="cloud-field absolute inset-[-12%] opacity-0"
+            className="cloud-field pointer-events-none absolute inset-[-12%] opacity-0"
             animate={{
-              opacity: introPhase === "clouds" ? 0.95 : 0,
-              scale: introPhase === "clouds" ? 1.1 : 1,
+              opacity: introPhase === "clouds" ? [0, 0.92, 0.18] : 0,
+              scale: introPhase === "clouds" ? [0.94, 1.03, 1.15] : 0.94,
             }}
-            transition={{ duration: 0.72, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 1.45, times: [0, 0.58, 1], ease: [0.16, 1, 0.3, 1] }}
           />
           <motion.div
-            className="absolute inset-0 bg-gradient-to-b from-[#0C0C0C] via-transparent to-[#0C0C0C]"
-            animate={{ opacity: introPhase === "clouds" ? 1 : 0 }}
+            className="intro-aperture pointer-events-none absolute inset-0"
+            animate={{
+              opacity: introPhase === "clouds" ? 1 : 0,
+              clipPath: introPhase === "clouds" ? "circle(100% at 50% 50%)" : "circle(0% at 50% 50%)",
+            }}
+            transition={{ duration: 1.3, ease: [0.16, 1, 0.3, 1] }}
           />
         </motion.div>
       ) : null}
+      </AnimatePresence>
 
-      <div className="noise-field absolute inset-0 opacity-70" aria-hidden="true" />
       <div className="film-grain pointer-events-none absolute inset-0 z-[1]" aria-hidden="true" />
       <div className="magnetic-hero-field pointer-events-none absolute inset-0 z-[2]" aria-hidden="true" />
       <div className="absolute inset-0 z-10 cinema-vignette" />
-      <div className="cinematic-stars absolute inset-0 z-10 opacity-25" aria-hidden="true" />
       <div className="relative z-20 grid min-h-screen items-center gap-12 px-5 pb-16 pt-28 sm:px-8 md:px-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-8 lg:pt-24">
         <div className="max-w-2xl">
           <FadeIn delay={0.08} y={30}>
             <h1 className="hero-heading max-w-[8.9ch] text-[clamp(3rem,7vw,6rem)] font-black uppercase leading-[0.84] tracking-[-0.024em] text-balance">
-              Cloud &amp; AI/ML Developer
+              Cloud, DevOps &amp; AI Engineer
             </h1>
           </FadeIn>
 
@@ -683,33 +636,17 @@ export default function Hero() {
             </div>
           </FadeIn>
 
-          <FadeIn delay={0.32} y={18}>
-            <div className="mt-7 inline-flex max-w-full rounded-full border border-white/10 bg-white/[0.035] px-4 py-2 text-sm font-light text-[#D7E2EA]/[0.78] backdrop-blur-xl">
-              <ValueStrip />
-            </div>
-          </FadeIn>
-
-          <FadeIn delay={0.36} y={18}>
-            <div className="mt-8 flex max-w-xl flex-wrap gap-2">
-              {heroSkills.map((skill) => (
-                <span
-                  key={skill}
-                  className="rounded-full border border-white/10 bg-white/[0.035] px-3.5 py-2 text-xs font-light leading-none text-[#D7E2EA]/[0.72] backdrop-blur-md"
-                >
-                  {skill}
-                </span>
-              ))}
-            </div>
-          </FadeIn>
         </div>
 
         <FadeIn delay={0.2} y={34} className="relative">
-          <MagneticGalaxy
-            reduceMotion={reduceMotion}
-            scrollY={galaxyY}
-            scrollScale={galaxyScale}
-            scrollOpacity={galaxyOpacity}
-          />
+          <Suspense fallback={<div className="aspect-[1.08] w-[min(94vw,660px)]" aria-hidden="true" />}>
+            <StormCore
+              reduceMotion={reduceMotion}
+              scrollY={galaxyY}
+              scrollScale={galaxyScale}
+              scrollOpacity={galaxyOpacity}
+            />
+          </Suspense>
         </FadeIn>
       </div>
     </section>
