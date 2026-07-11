@@ -43,7 +43,7 @@ function GreetingOverlay() {
           <span
             key={word}
             className="intro-greeting absolute inset-0 flex items-center justify-center px-6 font-display text-[clamp(3.8rem,10vw,8rem)] text-white drop-shadow-[0_18px_40px_rgba(0,0,0,0.8)]"
-            style={{ animationDelay: `${index * 1.28}s` }}
+            style={{ animationDelay: `${index * 1.55}s` }}
           >
             {word}
           </span>
@@ -521,19 +521,31 @@ export default function Hero() {
         <motion.div
           className="fixed inset-0 z-40 overflow-hidden bg-[#0C0C0C]"
           initial={{ opacity: 1 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          exit={{ opacity: 0, filter: "blur(12px)" }}
+          animate={{
+            opacity: introPhase === "clouds" ? [1, 0.92, 0] : 1,
+            scale: introPhase === "clouds" ? [1, 1.006, 1.02] : 1,
+            filter: introPhase === "clouds" ? ["blur(0px)", "blur(1px)", "blur(12px)"] : "blur(0px)",
+            backgroundColor: introPhase === "clouds" ? "rgba(12, 12, 12, 0)" : "rgba(12, 12, 12, 1)",
+          }}
+          transition={{
+            duration: introPhase === "clouds" ? 1.35 : 0.6,
+            times: introPhase === "clouds" ? [0, 0.34, 1] : undefined,
+            ease: [0.16, 1, 0.3, 1],
+          }}
+          exit={{ opacity: 0 }}
           role="region"
           aria-label="Cinematic portfolio introduction"
+          data-intro-phase={introPhase}
         >
-          <button
-            type="button"
-            onClick={finishIntro}
-            className="absolute right-5 top-5 z-50 rounded-full border border-white bg-white px-5 py-3 text-[0.7rem] font-bold uppercase tracking-[0.16em] text-black shadow-[0_12px_38px_rgba(0,0,0,0.38)] transition-transform hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-white sm:right-8 sm:top-7"
-          >
-            Skip to portfolio
-          </button>
+          {introPhase !== "clouds" ? (
+            <button
+              type="button"
+              onClick={finishIntro}
+              className="absolute right-5 top-5 z-50 rounded-full border border-white bg-white px-5 py-3 text-[0.7rem] font-bold uppercase tracking-[0.16em] text-black shadow-[0_12px_38px_rgba(0,0,0,0.38)] transition-transform hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-white sm:right-8 sm:top-7"
+            >
+              Skip to portfolio
+            </button>
+          ) : null}
           <motion.div
             className="absolute inset-0"
             initial={false}
@@ -579,18 +591,18 @@ export default function Hero() {
           <motion.div
             className="cloud-field pointer-events-none absolute inset-[-12%] opacity-0"
             animate={{
-              opacity: introPhase === "clouds" ? [0, 0.92, 0.18] : 0,
-              scale: introPhase === "clouds" ? [0.94, 1.03, 1.15] : 0.94,
+              opacity: introPhase === "clouds" ? [0, 0.88, 0.12] : 0,
+              scale: introPhase === "clouds" ? [0.9, 1.04, 1.22] : 0.9,
             }}
             transition={{ duration: 1.45, times: [0, 0.58, 1], ease: [0.16, 1, 0.3, 1] }}
           />
           <motion.div
             className="intro-aperture pointer-events-none absolute inset-0"
             animate={{
-              opacity: introPhase === "clouds" ? 1 : 0,
-              clipPath: introPhase === "clouds" ? "circle(100% at 50% 50%)" : "circle(0% at 50% 50%)",
+              opacity: introPhase === "clouds" ? [0, 0.72, 0] : 0,
+              clipPath: introPhase === "clouds" ? ["circle(0% at 50% 50%)", "circle(48% at 50% 50%)", "circle(120% at 50% 50%)"] : "circle(0% at 50% 50%)",
             }}
-            transition={{ duration: 1.3, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 1.35, times: [0, 0.46, 1], ease: [0.16, 1, 0.3, 1] }}
           />
         </motion.div>
       ) : null}
