@@ -7,9 +7,9 @@ import RoleRotator from "./RoleRotator";
 const StormCore = lazy(() => import("./StormCore"));
 
 const introGreetings = ["Hello", "Namaste", "Bonjour"];
-const PRE_INTRO_MS = 2600;
+const PRE_INTRO_MS = 5400;
 const INTRO_MAX_MS = 5600;
-const CLOUD_TRANSITION_MS = 900;
+const CLOUD_TRANSITION_MS = 1450;
 const INTRO_SESSION_KEY = "harshit-intro-seen-session";
 const welcomeText = "Harshit Sharma builds deployable cloud, AI, and backend systems.";
 const MAINFRAME_VIDEO_SRC =
