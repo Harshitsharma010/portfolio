@@ -7,15 +7,32 @@ import RoleRotator from "./RoleRotator";
 const StormCore = lazy(() => import("./StormCore"));
 
 const introGreetings = ["Hello", "Namaste", "Bonjour"];
-const PRE_INTRO_MS = 5400;
+const PRE_INTRO_MS = 2600;
 const INTRO_MAX_MS = 5600;
-const CLOUD_TRANSITION_MS = 1450;
+const CLOUD_TRANSITION_MS = 900;
+const INTRO_SESSION_KEY = "harshit-intro-seen-session";
 const welcomeText = "Harshit Sharma builds deployable cloud, AI, and backend systems.";
 const MAINFRAME_VIDEO_SRC =
   "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260530_042513_df96a13b-6155-4f6e-8b93-c9dee66fba08.mp4";
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
+}
+
+function hasSeenIntroThisSession() {
+  try {
+    return window.sessionStorage.getItem(INTRO_SESSION_KEY) === "true";
+  } catch {
+    return false;
+  }
+}
+
+function markIntroSeenThisSession() {
+  try {
+    window.sessionStorage.setItem(INTRO_SESSION_KEY, "true");
+  } catch {
+    // The intro still completes normally when browser storage is unavailable.
+  }
 }
 
 function GreetingOverlay() {
@@ -396,12 +413,13 @@ export default function Hero() {
     () => {
       if (typeof window === "undefined") return "welcome";
       const hasSectionDeepLink = Boolean(window.location.hash && window.location.hash !== "#home");
-      if (hasSectionDeepLink || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return "done";
+      if (hasSectionDeepLink || hasSeenIntroThisSession() || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return "done";
       return "welcome";
     },
   );
   const [introVideoReady, setIntroVideoReady] = useState(false);
   const finishIntro = useCallback(() => {
+    markIntroSeenThisSession();
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
     setIntroPhase("done");
   }, []);
@@ -512,9 +530,9 @@ export default function Hero() {
           <button
             type="button"
             onClick={finishIntro}
-            className="absolute right-5 top-5 z-50 rounded-full border border-white/25 bg-black/35 px-4 py-2 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-white backdrop-blur-md transition-colors hover:border-white/55 hover:bg-black/55 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:right-8 sm:top-7"
+            className="absolute right-5 top-5 z-50 rounded-full border border-white bg-white px-5 py-3 text-[0.7rem] font-bold uppercase tracking-[0.16em] text-black shadow-[0_12px_38px_rgba(0,0,0,0.38)] transition-transform hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-white sm:right-8 sm:top-7"
           >
-            Skip intro
+            Skip to portfolio
           </button>
           <motion.div
             className="absolute inset-0"
