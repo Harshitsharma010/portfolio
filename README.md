@@ -9,10 +9,10 @@ This site is built to show more than visual polish. It highlights deployable sys
 The portfolio is intended to be connected to:
 
 ```text
-https://harshitbits.in
+https://www.harshitbuilds.in
 ```
 
-Until the custom domain is connected, the project can be deployed through Vercel or any static hosting platform that supports Vite builds.
+The production portfolio is deployed through Vercel and connected to the custom domain above.
 
 ## What This Portfolio Shows
 
@@ -132,9 +132,9 @@ Recommended deployment path:
 3. Use the default Vite settings:
    - Build command: `npm run build`
    - Output directory: `dist`
-4. Add the Hostinger domain `harshitbits.in` in Vercel Domains.
+4. Add the Hostinger domain `harshitbuilds.in` in Vercel Domains.
 5. Update Hostinger DNS records using the values shown by Vercel.
-6. Set the primary domain and redirect `www.harshitbits.in` to `harshitbits.in`.
+6. Set the primary domain and redirect `harshitbuilds.in` to `www.harshitbuilds.in`.
 
 ## Design Direction
 
@@ -148,8 +148,7 @@ The portfolio follows a "cinematic engineering proof" direction:
 
 ## Contact
 
-- Portfolio: https://harshitbits.in
+- Portfolio: https://www.harshitbuilds.in
 - GitHub: https://github.com/Harshitsharma010
 - LinkedIn: https://www.linkedin.com/in/harshitsharma624
 - Email: harshitbhardwajhs@gmail.com
-
