@@ -10,7 +10,6 @@ const introGreetings = ["Hello", "Namaste", "Bonjour"];
 const PRE_INTRO_MS = 5400;
 const INTRO_MAX_MS = 5600;
 const CLOUD_TRANSITION_MS = 1450;
-const INTRO_SESSION_KEY = "harshit-intro-seen-session";
 const welcomeText = "Harshit Sharma builds deployable cloud, AI, and backend systems.";
 const MAINFRAME_VIDEO_SRC =
   "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260530_042513_df96a13b-6155-4f6e-8b93-c9dee66fba08.mp4";
@@ -19,20 +18,9 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
 }
 
-function hasSeenIntroThisSession() {
-  try {
-    return window.sessionStorage.getItem(INTRO_SESSION_KEY) === "true";
-  } catch {
-    return false;
-  }
-}
-
-function markIntroSeenThisSession() {
-  try {
-    window.sessionStorage.setItem(INTRO_SESSION_KEY, "true");
-  } catch {
-    // The intro still completes normally when browser storage is unavailable.
-  }
+function isReloadNavigation() {
+  const [navigationEntry] = window.performance.getEntriesByType("navigation") as PerformanceNavigationTiming[];
+  return navigationEntry?.type === "reload";
 }
 
 function GreetingOverlay() {
@@ -412,14 +400,19 @@ export default function Hero() {
   const [introPhase, setIntroPhase] = useState<"welcome" | "video" | "clouds" | "done">(
     () => {
       if (typeof window === "undefined") return "welcome";
-      const hasSectionDeepLink = Boolean(window.location.hash && window.location.hash !== "#home");
-      if (hasSectionDeepLink || hasSeenIntroThisSession() || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return "done";
+      const pageWasReloaded = isReloadNavigation();
+
+      if (pageWasReloaded && window.location.hash) {
+        window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
+      }
+
+      const hasSectionDeepLink = Boolean(!pageWasReloaded && window.location.hash && window.location.hash !== "#home");
+      if (hasSectionDeepLink || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return "done";
       return "welcome";
     },
   );
   const [introVideoReady, setIntroVideoReady] = useState(false);
   const finishIntro = useCallback(() => {
-    markIntroSeenThisSession();
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
     setIntroPhase("done");
   }, []);
