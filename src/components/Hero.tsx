@@ -1,5 +1,19 @@
-import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { AnimatePresence, motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
+import {
+  AnimatePresence,
+  motion,
+  useReducedMotion,
+  useScroll,
+  useTransform,
+} from "framer-motion";
 import RoleRotator from "./RoleRotator";
 
 const StormCore = lazy(() => import("./StormCore"));
@@ -56,10 +70,7 @@ function WelcomeIntro({
   const [typingDone, setTypingDone] = useState(Boolean(reduceMotion));
   const [actionsVisible, setActionsVisible] = useState(Boolean(reduceMotion));
   const [copied, setCopied] = useState(false);
-  const [interactiveVideo, setInteractiveVideo] = useState(false);
-  const [videoVisible, setVideoVisible] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const interactiveVideoAllowed = useRef(false);
   const previousX = useRef<number | null>(null);
   const targetTime = useRef(0);
   const seeking = useRef(false);
@@ -84,8 +95,8 @@ function WelcomeIntro({
           window.clearInterval(typeTimer);
           setTypingDone(true);
         }
-      }, 28);
-    }, 420);
+      }, 38);
+    }, 600);
 
     return () => {
       window.clearTimeout(startTimer);
@@ -95,34 +106,13 @@ function WelcomeIntro({
 
   useEffect(() => {
     if (reduceMotion) return;
-    const timer = window.setTimeout(() => setActionsVisible(true), 900);
+    const timer = window.setTimeout(() => setActionsVisible(true), 400);
     return () => window.clearTimeout(timer);
   }, [reduceMotion]);
 
   useEffect(() => {
-    if (reduceMotion) {
-      interactiveVideoAllowed.current = false;
-      return;
-    }
-    const pointerQuery = window.matchMedia("(min-width: 768px) and (hover: hover) and (pointer: fine)");
-    const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
-    interactiveVideoAllowed.current = pointerQuery.matches && !connection?.saveData;
-  }, [reduceMotion]);
-
-  const copyEmail = async () => {
-    try {
-      await navigator.clipboard.writeText("harshitbhardwajhs@gmail.com");
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 1400);
-    } catch {
-      onContinue();
-    }
-  };
-
-  useEffect(() => {
     if (reduceMotion) return;
-    const pointerQuery = window.matchMedia("(hover: hover) and (pointer: fine)");
-    if (!pointerQuery.matches) return;
+    const sensitivity = 0.8;
 
     const requestSeek = () => {
       const video = videoRef.current;
@@ -132,17 +122,6 @@ function WelcomeIntro({
     };
 
     const handleMove = (event: MouseEvent) => {
-      if (!interactiveVideoAllowed.current || event.clientX < window.innerWidth * 0.42) {
-        previousX.current = null;
-        return;
-      }
-
-      if (!interactiveVideo) {
-        previousX.current = event.clientX;
-        setInteractiveVideo(true);
-        return;
-      }
-
       const video = videoRef.current;
       if (!video || !Number.isFinite(video.duration) || video.duration <= 0) {
         previousX.current = event.clientX;
@@ -157,24 +136,28 @@ function WelcomeIntro({
 
       const delta = event.clientX - previousX.current;
       previousX.current = event.clientX;
-      targetTime.current = clamp(targetTime.current + (delta / window.innerWidth) * video.duration * 0.85, 0, video.duration);
+      const offset = (delta / window.innerWidth) * sensitivity * video.duration;
+      targetTime.current = clamp(targetTime.current + offset, 0, video.duration);
       requestSeek();
     };
 
     window.addEventListener("mousemove", handleMove);
     return () => window.removeEventListener("mousemove", handleMove);
-  }, [interactiveVideo, reduceMotion]);
+  }, [reduceMotion]);
+
+  const copyEmail = async () => {
+    try {
+      await navigator.clipboard.writeText("harshitbhardwajhs@gmail.com");
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1400);
+    } catch {
+      onContinue();
+    }
+  };
 
   const handleLoadedMetadata = () => {
     const video = videoRef.current;
-    if (!video) return;
-    const startAt = Number.isFinite(video.duration) ? Math.min(video.duration * 0.42, 1.4) : 0;
-    targetTime.current = startAt;
-    try {
-      video.currentTime = startAt;
-    } catch {
-      targetTime.current = 0;
-    }
+    if (video) targetTime.current = video.currentTime;
   };
 
   const handleSeeked = () => {
@@ -185,7 +168,7 @@ function WelcomeIntro({
     }
 
     seeking.current = false;
-    if (Number.isFinite(video.duration) && Math.abs(video.currentTime - targetTime.current) > 0.04) {
+    if (Math.abs(video.currentTime - targetTime.current) > 0.04) {
       seeking.current = true;
       video.currentTime = clamp(targetTime.current, 0, video.duration);
     }
@@ -193,32 +176,24 @@ function WelcomeIntro({
 
   return (
     <motion.div
-      className="preintro-source-shell absolute inset-0 z-30 overflow-hidden bg-[#f4f2ec] text-[#111111]"
+      className="preintro-source-shell absolute inset-0 z-30 overflow-hidden bg-[#A8A9A7] text-[#111111]"
       initial={reduceMotion ? false : { opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0, scale: 1.025, filter: "blur(10px)" }}
       transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
     >
-      <div className="preintro-static-character" aria-hidden="true">
-        <img src="/media/intro-mainframe-body.png" alt="" className="preintro-mainframe-body" />
-        <img src="/media/intro-mainframe-head.png" alt="" className="preintro-mainframe-head" />
-        <span className="preintro-screen-bloom" />
-      </div>
-      {interactiveVideo ? (
-        <video
-          ref={videoRef}
-          className={`preintro-source-video${videoVisible ? " is-visible" : ""}`}
-          muted
-          playsInline
-          preload="metadata"
-          onLoadedMetadata={handleLoadedMetadata}
-          onLoadedData={() => setVideoVisible(true)}
-          onSeeked={handleSeeked}
-          aria-hidden="true"
-        >
-          <source src={MAINFRAME_VIDEO_SRC} type="video/mp4" />
-        </video>
-      ) : null}
+      <video
+        ref={videoRef}
+        className="preintro-source-video"
+        muted
+        playsInline
+        preload="auto"
+        onLoadedMetadata={handleLoadedMetadata}
+        onSeeked={handleSeeked}
+        aria-hidden="true"
+      >
+        <source src={MAINFRAME_VIDEO_SRC} type="video/mp4" />
+      </video>
       <div className="preintro-source-wash" aria-hidden="true" />
       <div className="preintro-source-grain" aria-hidden="true" />
 
@@ -229,7 +204,7 @@ function WelcomeIntro({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
         >
-          <button type="button" onClick={onContinue} className="min-h-11 font-black tracking-[-0.04em]">
+          <button type="button" onClick={onContinue} className="preintro-brand min-h-11 font-black tracking-[-0.04em]">
             Harshit Sharma <span className="text-black/45">*</span>
           </button>
           <p className="hidden text-black/80 md:block" aria-hidden="true">

@@ -131,7 +131,12 @@ a {
 
 .preintro-source-shell {
   color: #0f0f0f;
-  background: #f4f2ec;
+  background: #a8a9a7;
+  font-family: "HelveticaNowDisplayW01-Rg", "Helvetica Neue", Arial, sans-serif;
+}
+
+.preintro-brand {
+  font-family: "HelveticaNowDisplay-Medium", "Helvetica Neue", Arial, sans-serif;
 }
 
 .preintro-source-video {
@@ -142,49 +147,14 @@ a {
   height: 100%;
   object-fit: cover;
   object-position: 70% center;
-  filter: saturate(0.92) contrast(1.02);
-}
-
-.preintro-source-video {
-  opacity: 0;
-  transition: opacity 320ms ease;
-}
-
-.preintro-source-video.is-visible {
-  opacity: 1;
-}
-
-.preintro-static-character {
-  position: absolute;
-  right: 2%;
-  bottom: -2%;
-  z-index: 0;
-  width: min(56vw, 650px);
-  aspect-ratio: 370 / 361;
-  pointer-events: none;
-}
-
-.preintro-static-character > .preintro-mainframe-body {
-  position: absolute;
-  inset: 0;
-  height: 100%;
-  width: 100%;
-  object-fit: contain;
+  background: #a8a9a7;
 }
 
 @media (max-width: 767px) {
-  .preintro-static-character {
-    right: auto;
-    left: 50%;
-    bottom: 2%;
-    width: min(95vw, 370px);
-    transform: translateX(-50%);
-  }
-
   .preintro-source-wash {
     background:
-      linear-gradient(180deg, rgba(244, 242, 236, 0.62), rgba(244, 242, 236, 0.16) 48%, rgba(0, 0, 0, 0.04)),
-      linear-gradient(90deg, rgba(244, 242, 236, 0.3), transparent 65%);
+      linear-gradient(180deg, rgba(184, 185, 182, 0.48), rgba(168, 169, 167, 0.08) 48%, rgba(0, 0, 0, 0.08)),
+      linear-gradient(90deg, rgba(190, 191, 188, 0.26), transparent 65%);
   }
 }
 
@@ -193,8 +163,8 @@ a {
   inset: 0;
   z-index: 1;
   background:
-    radial-gradient(circle at 72% 38%, rgba(255, 255, 255, 0.08), transparent 34%),
-    linear-gradient(90deg, rgba(244, 242, 236, 0.52), rgba(244, 242, 236, 0.12) 31%, rgba(244, 242, 236, 0.02) 68%, rgba(0, 0, 0, 0.08));
+    radial-gradient(circle at 60% 36%, rgba(255, 255, 255, 0.1), transparent 34%),
+    linear-gradient(90deg, rgba(188, 189, 186, 0.68), rgba(176, 177, 174, 0.2) 34%, transparent 68%, rgba(0, 0, 0, 0.1));
   pointer-events: none;
 }
 
@@ -214,7 +184,7 @@ a {
 
 .preintro-source-copy {
   color: #0f0f0f;
-  text-shadow: 0 1px 18px rgba(244, 242, 236, 0.42);
+  text-shadow: 0 1px 18px rgba(210, 211, 208, 0.38);
 }
 
 .preintro-source-label {
@@ -315,70 +285,6 @@ a {
   overflow: visible;
   transform-style: preserve-3d;
   will-change: transform;
-}
-
-.preintro-person-stage {
-  isolation: isolate;
-  transform-style: preserve-3d;
-}
-
-.preintro-figure-shell {
-  overflow: visible;
-  perspective: 900px;
-  transform-style: preserve-3d;
-  will-change: transform;
-}
-
-.preintro-character-frame {
-  position: absolute;
-  overflow: visible;
-}
-
-.preintro-figure-aura {
-  background:
-    radial-gradient(circle at 52% 35%, rgba(255, 255, 255, 0.58), transparent 27%),
-    radial-gradient(circle at 52% 54%, rgba(255, 255, 255, 0.24), transparent 52%),
-    radial-gradient(circle at 50% 80%, rgba(0, 0, 0, 0.12), transparent 64%);
-  filter: blur(18px);
-  opacity: 0.9;
-  pointer-events: none;
-  will-change: transform;
-}
-
-.preintro-mainframe-body {
-  transform-origin: 50% 100%;
-  transform: none;
-  filter: drop-shadow(0 24px 34px rgba(0, 0, 0, 0.16)) saturate(0.94) contrast(1.03);
-}
-
-.preintro-mainframe-head {
-  position: absolute;
-  left: 20.27%;
-  top: 6.93%;
-  z-index: 2;
-  width: 63.79%;
-  transform-origin: center bottom;
-  transform-style: preserve-3d;
-  will-change: transform;
-  filter: drop-shadow(0 18px 24px rgba(0, 0, 0, 0.2)) saturate(0.94) contrast(1.04);
-}
-
-.preintro-screen-bloom {
-  position: absolute;
-  left: 41%;
-  top: 27%;
-  z-index: 3;
-  width: 31%;
-  height: 18%;
-  border-radius: 999px;
-  background:
-    radial-gradient(circle at 32% 50%, rgba(255, 229, 255, 0.42), transparent 18%),
-    radial-gradient(circle at 70% 50%, rgba(255, 229, 255, 0.38), transparent 18%);
-  filter: blur(12px);
-  opacity: 0.72;
-  pointer-events: none;
-  will-change: transform;
-  mix-blend-mode: screen;
 }
 
 .silver-rule {
