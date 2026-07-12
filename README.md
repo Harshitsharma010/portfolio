@@ -1,5 +1,7 @@
 # Harshit Sharma Portfolio
 
+[![CI](https://github.com/Harshitsharma010/portfolio/actions/workflows/ci.yml/badge.svg)](https://github.com/Harshitsharma010/portfolio/actions/workflows/ci.yml)
+
 A cinematic engineering portfolio for presenting live projects, cloud deployment proof, and recruiter-ready case studies.
 
 This site is built to show more than visual polish. It highlights deployable systems, inspectable repositories, live demos, architecture thinking, and documented tradeoffs across cloud, DevOps, backend, AI/ML, and security-focused work.
@@ -13,6 +15,8 @@ https://www.harshitbuilds.in
 ```
 
 The production portfolio is deployed through Vercel and connected to the custom domain above.
+
+Every push and pull request is type-checked and built through GitHub Actions. Dependabot monitors npm and GitHub Actions dependencies on a limited schedule to keep maintenance reviewable.
 
 ## What This Portfolio Shows
 
