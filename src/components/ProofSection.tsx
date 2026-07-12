@@ -18,8 +18,8 @@ const trustnetSteps = [
     shortLabel: "Browser",
     label: "Browser signal",
     title: "A suspicious link enters the workflow.",
-    detail: "The Manifest V3 extension shows a risk signal where users encounter suspicious URLs.",
-    proof: "Chrome extension",
+    detail: "The locally installed Manifest V3 extension shows a risk signal where users encounter suspicious URLs.",
+    proof: "Local Chrome extension",
   },
   {
     number: "02",
@@ -48,8 +48,8 @@ const trustnetSteps = [
 ];
 
 const verificationRows = [
-  { label: "Live interface", value: "AWS Amplify" },
-  { label: "User surface", value: "Manifest V3 extension" },
+  { label: "Dashboard", value: "Hosted on AWS Amplify" },
+  { label: "Extension", value: "Runs locally / Manifest V3" },
   { label: "Deployment record", value: "Lambda / API Gateway / ECR / CloudWatch" },
 ];
 

@@ -59,6 +59,7 @@ function WelcomeIntro({
   const [interactiveVideo, setInteractiveVideo] = useState(false);
   const [videoVisible, setVideoVisible] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const interactiveVideoAllowed = useRef(false);
   const previousX = useRef<number | null>(null);
   const targetTime = useRef(0);
   const seeking = useRef(false);
@@ -99,10 +100,13 @@ function WelcomeIntro({
   }, [reduceMotion]);
 
   useEffect(() => {
-    if (reduceMotion) return;
+    if (reduceMotion) {
+      interactiveVideoAllowed.current = false;
+      return;
+    }
     const pointerQuery = window.matchMedia("(min-width: 768px) and (hover: hover) and (pointer: fine)");
     const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
-    setInteractiveVideo(pointerQuery.matches && !connection?.saveData);
+    interactiveVideoAllowed.current = pointerQuery.matches && !connection?.saveData;
   }, [reduceMotion]);
 
   const copyEmail = async () => {
@@ -128,6 +132,17 @@ function WelcomeIntro({
     };
 
     const handleMove = (event: MouseEvent) => {
+      if (!interactiveVideoAllowed.current || event.clientX < window.innerWidth * 0.42) {
+        previousX.current = null;
+        return;
+      }
+
+      if (!interactiveVideo) {
+        previousX.current = event.clientX;
+        setInteractiveVideo(true);
+        return;
+      }
+
       const video = videoRef.current;
       if (!video || !Number.isFinite(video.duration) || video.duration <= 0) {
         previousX.current = event.clientX;
@@ -148,7 +163,7 @@ function WelcomeIntro({
 
     window.addEventListener("mousemove", handleMove);
     return () => window.removeEventListener("mousemove", handleMove);
-  }, [reduceMotion]);
+  }, [interactiveVideo, reduceMotion]);
 
   const handleLoadedMetadata = () => {
     const video = videoRef.current;
@@ -383,7 +398,7 @@ export default function Hero() {
     const startIntro = () => {
       try {
         video.currentTime = 0;
-        video.playbackRate = 1.08;
+        video.playbackRate = 1;
       } catch {
         // Some browsers can reject currentTime while metadata is still settling.
       }
@@ -481,7 +496,7 @@ export default function Hero() {
               src="/media/intro-hero-20260703.mp4"
               muted
               playsInline
-              preload="metadata"
+              preload="auto"
               onPlaying={() => setIntroVideoReady(true)}
               onEnded={startIntroTransition}
               onError={startIntroTransition}
