@@ -1,4 +1,4 @@
-import { Code2, ExternalLink } from "lucide-react";
+import { ChevronDown, Code2, ExternalLink } from "lucide-react";
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { type CSSProperties, useRef } from "react";
 import FadeIn from "./FadeIn";
@@ -24,7 +24,7 @@ function ProjectCard({ project, index, total }: { project: Project; index: numbe
   return (
     <div ref={ref} className={`relative lg:h-[130vh] ${index > 0 ? "lg:-mt-[42vh]" : ""}`}>
       <motion.article
-        className={`project-case-card group relative border border-[#D7E2EA]/[0.18] p-5 text-[#D7E2EA] shadow-[0_26px_70px_rgba(0,0,0,0.42)] lg:sticky lg:top-[calc(6rem+var(--project-card-offset))] lg:max-h-[calc(100vh-7rem)] lg:overflow-hidden xl:top-[calc(8rem+var(--project-card-offset))] ${
+        className={`project-case-card group relative overflow-hidden rounded-xl border border-[#D7E2EA]/[0.18] p-5 text-[#D7E2EA] lg:sticky lg:top-[calc(6rem+var(--project-card-offset))] lg:max-h-[calc(100vh-7rem)] xl:top-[calc(8rem+var(--project-card-offset))] ${
           isFeatured ? "md:p-7" : "md:p-6"
         }`}
         style={{
@@ -92,7 +92,7 @@ function ProjectCard({ project, index, total }: { project: Project; index: numbe
             </div>
           </div>
 
-          <div className="border-y border-[#D7E2EA]/[0.16] py-6">
+          <div className="hidden border-y border-[#D7E2EA]/[0.16] py-6 md:block">
             <h4 className="text-sm font-semibold uppercase tracking-[0.18em] text-[#F4F7F8]">
               Build notes
             </h4>
@@ -104,6 +104,20 @@ function ProjectCard({ project, index, total }: { project: Project; index: numbe
               ))}
             </div>
           </div>
+
+          <details className="project-build-details border-y border-[#D7E2EA]/[0.16] py-1 md:hidden">
+            <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-4 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-[#F4F7F8]">
+              Build notes
+              <ChevronDown className="h-4 w-4 transition-transform" aria-hidden="true" />
+            </summary>
+            <div className="grid gap-4 pb-5 pt-2">
+              {project.build.map((item) => (
+                <p key={item} className="text-sm font-light leading-6 text-[#D7E2EA]/[0.74]">
+                  {item}
+                </p>
+              ))}
+            </div>
+          </details>
 
           <div className="flex flex-wrap gap-2">
             {project.stack.map((tech) => (
@@ -119,22 +133,28 @@ function ProjectCard({ project, index, total }: { project: Project; index: numbe
           <div className="flex flex-wrap gap-3">
             <motion.a
               href={project.href}
+              target="_blank"
+              rel="noreferrer"
               whileHover={{ y: -2 }}
               whileTap={{ scale: 0.98 }}
-              className="inline-flex items-center gap-2 bg-[#D7E2EA] px-5 py-3 text-sm font-medium uppercase tracking-[0.14em] text-[#0C0C0C] transition-colors hover:bg-white"
+              className="inline-flex min-h-12 items-center gap-2 rounded-full bg-[#D7E2EA] px-5 py-3 text-sm font-medium uppercase tracking-[0.14em] text-[#0C0C0C] transition-colors hover:bg-white"
             >
               <Code2 size={16} />
               Inspect repo
             </motion.a>
-            <motion.a
-              href={project.liveHref ?? project.href}
-              whileHover={{ y: -2 }}
-              whileTap={{ scale: 0.98 }}
-              className="inline-flex items-center gap-2 border border-[#D7E2EA]/[0.55] px-5 py-3 text-sm font-medium uppercase tracking-[0.14em] text-[#D7E2EA] transition-colors hover:bg-[#D7E2EA]/[0.12]"
-            >
-              <ExternalLink size={16} />
-              {project.liveHref ? "Live proof" : "View proof"}
-            </motion.a>
+            {project.liveHref ? (
+              <motion.a
+                href={project.liveHref}
+                target="_blank"
+                rel="noreferrer"
+                whileHover={{ y: -2 }}
+                whileTap={{ scale: 0.98 }}
+                className="inline-flex min-h-12 items-center gap-2 rounded-full border border-[#D7E2EA]/[0.55] px-5 py-3 text-sm font-medium uppercase tracking-[0.14em] text-[#D7E2EA] transition-colors hover:bg-[#D7E2EA]/[0.12]"
+              >
+                <ExternalLink size={16} />
+                Open live app
+              </motion.a>
+            ) : null}
           </div>
         </div>
       </div>
@@ -159,7 +179,7 @@ export default function ProjectsSection() {
           </FadeIn>
           <FadeIn delay={0.08}>
             <p className="max-w-2xl text-base font-light leading-7 text-[#D7E2EA]/[0.72] sm:text-lg">
-              Each project is framed as a small engineering case study: the problem, the build choices, the proof a reviewer can inspect, and the repo or live link.
+              Each case study covers the problem, engineering decisions, inspectable evidence, and the repository or live application.
             </p>
           </FadeIn>
         </div>

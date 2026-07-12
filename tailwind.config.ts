@@ -6,7 +6,7 @@ export default {
     extend: {
       fontFamily: {
         display: ["Instrument Serif", "Georgia", "serif"],
-        body: ["Kanit", "Inter", "Arial", "sans-serif"],
+        body: ["Kanit", "Arial", "sans-serif"],
       },
       colors: {
         portfolio: {

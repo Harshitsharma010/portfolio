@@ -20,11 +20,6 @@ export type SkillGroup = {
   tools: string[];
 };
 
-export type Metric = {
-  value: string;
-  label: string;
-};
-
 export type SnapshotItem = {
   value: string;
   label: string;
@@ -37,19 +32,12 @@ export type BuildStep = {
 };
 
 export const snapshotItems: SnapshotItem[] = [
-  { value: "2", label: "Live apps", detail: "Nexus and TrustNet are openable by a recruiter." },
-  { value: "1", label: "Cloud IaC lab", detail: "ECS Fargate, Terraform, ECR, ALB, and logs." },
+  { value: "2", label: "Live apps", detail: "Nexus and TrustNet are available as live demos." },
+  { value: "1", label: "Cloud IaC lab", detail: "ECS Fargate infrastructure with Terraform, ECR, ALB, and CloudWatch." },
   { value: "1", label: "AI / RAG build", detail: "Local document assistant with vector search and Ollama." },
-  { value: "4", label: "Case studies", detail: "Cloud, security, AI, and full-stack product work." },
-  { value: "Core", label: "Track", detail: "Cloud / DevOps / Backend / AI engineering." },
-  { value: "Open", label: "For roles", detail: "Internship and entry-level engineering opportunities." },
-];
-
-export const metrics: Metric[] = [
-  { value: "4", label: "ship-focused projects across cloud, AI, and security" },
-  { value: "2", label: "live deployed apps recruiters can open: TrustNet and Nexus" },
-  { value: "API", label: "REST workflows across auth, projects, tasks, and dashboards" },
-  { value: "IaC", label: "Terraform to ECR to ECS Fargate to ALB to CloudWatch" },
+  { value: "4", label: "Case studies", detail: "Cloud, security, AI, and full-stack engineering." },
+  { value: "Cloud", label: "Primary focus", detail: "Cloud / DevOps / Backend / AI engineering." },
+  { value: "Open", label: "Availability", detail: "Entry-level Cloud, DevOps, Infrastructure, and Technical Consulting roles." },
 ];
 
 export const projects: Project[] = [
@@ -60,9 +48,9 @@ export const projects: Project[] = [
     oneLiner:
       "An ML-powered phishing detection system with a Chrome extension, React dashboard, and cloud deployment path.",
     description:
-      "A security project that connects model inference, browser workflow, dashboard visibility, and AWS deployment notes.",
+      "Brings phishing checks into the browser and makes the prediction path inspectable through a dashboard and deployment notes.",
     problem:
-      "Scam links are harder for normal users to inspect manually, and a useful detector has to fit into the browser flow.",
+      "Suspicious links are difficult for non-technical users to assess, and a useful detector must fit naturally into the browser workflow.",
     build: [
       "Extracts URL-level features including length, subdomain count, TLD, HTTPS presence, and suspicious keywords.",
       "Serves predictions through backend APIs consumed by a React dashboard and Manifest V3 Chrome extension.",
@@ -78,11 +66,11 @@ export const projects: Project[] = [
   {
     number: "02",
     title: "AWS ECS Fargate Terraform CI/CD",
-    subtitle: "DevOps proof",
+    subtitle: "Cloud deployment lab",
     oneLiner:
       "A production-style CI/CD pipeline that takes a FastAPI service from code to a monitored cloud deployment.",
     description:
-      "This is the project that backs up the claim that I can deploy, test, observe, and tear down cloud infrastructure.",
+      "A repeatable cloud deployment that demonstrates API testing, runtime visibility, and controlled infrastructure teardown.",
     problem:
       "Many student APIs stop at localhost. This one is designed around repeatable deployment and reviewer inspection.",
     build: [
@@ -115,7 +103,7 @@ export const projects: Project[] = [
     href: "https://github.com/Harshitsharma010/local-ai-rag-assistant",
     language: "Python",
     proof: ["RAG pipeline", "Local LLM", "Vector search"],
-    status: "Local first",
+    status: "Local-first",
   },
   {
     number: "04",
@@ -124,9 +112,9 @@ export const projects: Project[] = [
     oneLiner:
       "A full-stack team task management platform with JWT auth, role-aware collaboration, Kanban workflow, comments, and analytics.",
     description:
-      "A deployed full-stack build that proves product flow, API design, auth, authorization, database modeling, dashboard aggregation, and production configuration.",
+      "A deployed full-stack product demonstrating API design, authentication, authorization, data modeling, dashboard aggregation, and production configuration.",
     problem:
-      "Beginner task apps usually stop at personal todos. This project is closer to a real team workflow with project access, assigned work, comments, and progress visibility.",
+      "Basic task apps often stop at personal to-do lists. This project supports a team workflow with project access, assigned work, comments, and progress visibility.",
     build: [
       "Implements protected projects, member management, task assignment, priorities, comments, filters, and dashboard analytics.",
       "Uses JWT authentication, hashed passwords, and role-based access for admin and member workflows.",
@@ -137,7 +125,7 @@ export const projects: Project[] = [
     liveHref: "https://team-task-manager-ydda.vercel.app",
     language: "JavaScript",
     proof: ["Live demo", "JWT auth", "Dashboard analytics"],
-    status: "Deployed full stack",
+    status: "Live full-stack app",
   },
 ];
 
@@ -173,18 +161,18 @@ export const standards = [
   "Clear problem statement",
   "Architecture diagram or deployment map",
   "Local setup someone else can follow",
-  "Screenshots, live link, or walkthrough proof",
-  "API examples with request and response shapes",
-  "Deployment notes and cost tradeoffs",
-  "Security notes and known limitations",
-  "Future improvements list",
+  "Screenshots, a live link, or a walkthrough",
+  "Request and response examples",
+  "Deployment and cost notes",
+  "Security notes and known limits",
+  "Documented next steps",
 ];
 
 export const focusItems = [
-  "Making every project recruiter-readable: screenshots, architecture notes, working demo links, and honest limitations.",
-  "Improving AI and ML work with real data flow, evaluation notes, and plain-English explanations.",
-  "Going deeper on AWS deployment patterns: IAM, cost tradeoffs, security groups, and logs.",
-  "Building security tools that explain risk clearly instead of only flagging red or green.",
+  "Keeping every project recruiter-readable with screenshots, architecture notes, working demos, and honest limitations.",
+  "Improving AI/ML projects with clear data flow, evaluation notes, and plain-English explanations.",
+  "Deepening AWS knowledge across IAM, cost controls, security groups, and observability.",
+  "Building security tools that explain risk instead of showing only red or green.",
 ];
 
 export const buildSteps: BuildStep[] = [
@@ -198,7 +186,7 @@ export const buildSteps: BuildStep[] = [
   },
   {
     title: "Deploy and verify",
-    description: "I test with live URLs, API calls, logs, screenshots, and setup notes instead of stopping at localhost.",
+    description: "I verify with live URLs, API calls, logs, screenshots, and setup notes instead of stopping at localhost.",
   },
   {
     title: "Document tradeoffs",
@@ -206,15 +194,15 @@ export const buildSteps: BuildStep[] = [
   },
   {
     title: "Keep it inspectable",
-    description: "Repos, live links, architecture notes, and proof signals stay easy for a recruiter or teammate to review.",
+    description: "Repositories, live links, architecture notes, and evidence stay easy for recruiters and teammates to review.",
   },
 ];
 
 export const principles = [
-  "I ship things that run somewhere other than localhost.",
-  "Every main project gets setup docs, architecture notes, and limitations.",
-  "I would rather document a tradeoff honestly than hide behind a feature list.",
-  "I build for the reviewer who wants to inspect the repo, run it, and understand the decisions.",
+  "I ship projects that run beyond localhost.",
+  "Every main project includes setup instructions, architecture notes, and known limitations.",
+  "I document tradeoffs instead of hiding behind feature lists.",
+  "I design for reviewers who want to inspect the repository, run the project, and understand the decisions.",
 ];
 
 export const marqueeSkills = [

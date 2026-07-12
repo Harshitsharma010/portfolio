@@ -1,6 +1,5 @@
 import { lazy, Suspense, useLayoutEffect } from "react";
 import Navbar from "./components/Navbar";
-import ProofRail from "./components/ProofRail";
 import ScrollProgress from "./components/ScrollProgress";
 import Hero from "./components/Hero";
 import AboutSection from "./components/AboutSection";
@@ -59,7 +58,6 @@ function App() {
   return (
     <main className="bg-[#0C0C0C] font-body text-[#D7E2EA]">
       <ScrollProgress />
-      <ProofRail />
       <Navbar />
       <Hero />
       <RecruiterSnapshot />

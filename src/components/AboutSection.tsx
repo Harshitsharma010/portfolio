@@ -15,7 +15,7 @@ export default function AboutSection() {
         <FadeIn>
           <div className="sticky top-28">
             <p className="max-w-xs text-sm font-medium uppercase leading-6 tracking-[0.22em] text-[#D7E2EA]/[0.58]">
-              CSE student, placement focused
+              Computer Science student / Cloud + AI
             </p>
             <h2 className="mt-6 text-[clamp(3.1rem,8vw,5.8rem)] font-black uppercase leading-[0.86] tracking-[-0.035em] text-[#F4F7F8]">
               I build systems that survive deployment.
@@ -25,16 +25,16 @@ export default function AboutSection() {
 
         <div className="space-y-12">
           <AnimatedText
-            text="Most student projects stop at 'it runs.' Mine start there."
+            text="Most student projects stop once they run locally. Mine continue into deployment."
             className="max-w-3xl text-[clamp(1.45rem,3vw,2.55rem)] font-medium leading-tight tracking-[-0.025em] text-[#F4F7F8]"
           />
 
           <FadeIn className="max-w-3xl space-y-6 text-base font-light leading-8 text-[#D7E2EA]/[0.78] sm:text-lg">
             <p>
-              I am a Computer Science student building cloud, AI, and security projects that can be inspected beyond a screenshot. Over the past year, that has meant containerizing APIs with Docker, pushing images through Amazon ECR, wiring CI checks in GitHub Actions, and reading CloudWatch logs to see if the system behaves outside my laptop.
+              I am a Computer Science student building cloud, AI, and security projects that can be inspected beyond screenshots. My work includes containerized APIs, Amazon ECR deployments, GitHub Actions checks, and CloudWatch logs that show how systems behave outside my laptop.
             </p>
             <p>
-              I care about the parts that usually get skipped in student portfolios: environment variables, health checks, deployment notes, security limits, cost tradeoffs, and the question a teammate would ask before trusting the repo. The projects below are written to show how I think, how I ship, and what I still know needs work.
+              I focus on details student portfolios often skip: environment variables, health checks, deployment notes, security boundaries, and cost tradeoffs. Each case study explains the decisions, evidence, and known limitations.
             </p>
           </FadeIn>
 

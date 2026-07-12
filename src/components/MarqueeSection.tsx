@@ -4,13 +4,7 @@ import { marqueeSkills, projects, standards } from "../data/sections";
 
 const firstRow = marqueeSkills;
 
-const secondRow = [
-  ...standards,
-  "Cost notes",
-  "Reviewer depth",
-  "Security notes",
-  "Deployment proof",
-];
+const secondRow = standards;
 
 function MarqueeTile({ label, meta }: { label: string; meta: string }) {
   return (
@@ -56,7 +50,7 @@ export default function MarqueeSection() {
           Proof signals recruiters can scan quickly.
         </p>
         <p className="hidden max-w-sm text-right text-sm font-light leading-6 text-[#D7E2EA]/[0.62] md:block">
-          The movement is atmospheric, but the content is practical: deployment, documentation, security notes, and working links.
+          Deployment notes, security limits, and working links make each project easier to inspect.
         </p>
       </div>
 

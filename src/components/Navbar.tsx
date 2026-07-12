@@ -31,14 +31,14 @@ export default function Navbar() {
   }, [menuOpen]);
 
   return (
-    <header className="pointer-events-none fixed inset-x-0 top-0 z-30 bg-gradient-to-b from-[#0C0C0C]/95 via-[#0C0C0C]/72 to-transparent pb-8">
-      <nav className="relative z-20 mx-auto flex max-w-7xl items-center justify-between px-5 pt-5 sm:px-8 sm:pt-7 md:px-10">
+    <header className="pointer-events-none fixed inset-x-0 top-0 z-30 border-b border-white/[0.06] bg-[#0C0C0C]/90 backdrop-blur-2xl">
+      <nav className="relative z-20 mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8 sm:py-5 md:px-10">
         <a
           href="#home"
           className="pointer-events-auto text-2xl font-black uppercase leading-none tracking-[-0.04em] text-[#D7E2EA] sm:text-3xl"
           aria-label="Harshit Sharma home"
         >
-          Harshit<sup className="ml-0.5 align-super text-xs">®</sup>
+          Harshit
         </a>
         <div className="pointer-events-auto hidden items-center gap-5 md:flex lg:gap-7">
           {menuItems.map((item) => (
@@ -53,9 +53,11 @@ export default function Navbar() {
         </div>
         <motion.a
           href="https://github.com/Harshitsharma010"
+          target="_blank"
+          rel="noreferrer"
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.98 }}
-          className="pointer-events-auto hidden rounded-full border border-[#D7E2EA]/[0.38] px-5 py-2.5 text-sm font-medium uppercase tracking-[0.16em] text-[#D7E2EA] transition-colors hover:bg-[#D7E2EA] hover:text-[#0C0C0C] sm:px-6 md:block"
+          className="pointer-events-auto hidden min-h-11 items-center rounded-full border border-[#D7E2EA]/[0.38] px-5 py-2.5 text-sm font-medium uppercase tracking-[0.16em] text-[#D7E2EA] transition-colors hover:bg-[#D7E2EA] hover:text-[#0C0C0C] sm:px-6 md:inline-flex"
         >
           GitHub
         </motion.a>
@@ -76,7 +78,7 @@ export default function Navbar() {
         {menuOpen ? (
           <motion.div
             id="mobile-navigation"
-            className="pointer-events-auto fixed inset-x-3 top-[4.75rem] overflow-hidden rounded-2xl border border-white/15 bg-[#0B090C]/95 p-3 shadow-[0_28px_90px_rgba(0,0,0,0.65)] backdrop-blur-2xl md:hidden"
+            className="pointer-events-auto fixed inset-x-3 top-[4.75rem] overflow-hidden rounded-2xl border border-white/15 bg-[#0B090C] p-3 shadow-[0_8px_8px_rgba(0,0,0,0.42)] md:hidden"
             initial={{ opacity: 0, y: -10, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.985 }}
@@ -99,6 +101,8 @@ export default function Navbar() {
             </div>
             <a
               href="https://github.com/Harshitsharma010"
+              target="_blank"
+              rel="noreferrer"
               className="mt-2 flex min-h-12 items-center justify-center rounded-xl border border-white/15 bg-white/[0.07] px-4 text-sm font-semibold uppercase tracking-[0.16em] text-white transition-colors hover:bg-white/[0.12]"
             >
               View GitHub

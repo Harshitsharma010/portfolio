@@ -43,17 +43,35 @@ export default function AnimatedText({ text, className }: AnimatedTextProps) {
     return <p className={className}>{text}</p>;
   }
 
+  let characterOffset = 0;
+
   return (
-    <p ref={ref} className={className} aria-label={text}>
-      {Array.from(text).map((character, index) => (
-        <AnimatedCharacter
-          key={`${character}-${index}`}
-          character={character}
-          index={index}
-          total={text.length}
-          progress={scrollYProgress}
-        />
-      ))}
+    <p ref={ref} className={className}>
+      <span className="sr-only">{text}</span>
+      <span aria-hidden="true">
+        {text.split(/(\s+)/).map((token, tokenIndex) => {
+          const tokenStart = characterOffset;
+          characterOffset += token.length;
+
+          if (/^\s+$/.test(token)) {
+            return <span key={`space-${tokenIndex}`}> </span>;
+          }
+
+          return (
+            <span key={`${token}-${tokenIndex}`} className="inline-block whitespace-nowrap">
+              {Array.from(token).map((character, characterIndex) => (
+                <AnimatedCharacter
+                  key={`${character}-${characterIndex}`}
+                  character={character}
+                  index={tokenStart + characterIndex}
+                  total={text.length}
+                  progress={scrollYProgress}
+                />
+              ))}
+            </span>
+          );
+        })}
+      </span>
     </p>
   );
 }

@@ -146,14 +146,14 @@ export default function StormCore({
     const isMobile = window.matchMedia("(max-width: 767px)").matches;
     const renderer = new WebGLRenderer({ canvas, alpha: true, antialias: false, powerPreference: "high-performance" });
     renderer.setClearColor(0x000000, 0);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile ? 1 : 1.25));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile ? 1 : 1.15));
 
     const scene = new Scene();
     scene.fog = new Fog(0x09060b, 7, 16);
     const camera = new PerspectiveCamera(46, 1, 0.1, 40);
     camera.position.set(0, 0, 7);
 
-    const geometry = createStormGeometry(isMobile ? 7600 : 28000);
+    const geometry = createStormGeometry(isMobile ? 4800 : 22000);
     const uniforms = {
       uTime: { value: 0 },
       uSize: { value: isMobile ? 52 : 66 },
@@ -275,7 +275,7 @@ export default function StormCore({
 
   return (
     <motion.div
-      className={`storm-core relative mx-auto aspect-square ${palette === "original" ? "storm-core-original" : ""} ${fullscreen ? "w-[min(92vmin,900px)]" : "w-[min(90vw,610px)]"}`}
+      className={`storm-core relative mx-auto aspect-square ${palette === "original" ? "storm-core-original" : ""} ${fullscreen ? "w-[min(92vmin,900px)]" : "w-[min(88vw,560px)]"}`}
       style={{
         y: reduceMotion ? 0 : scrollY,
         scale: reduceMotion ? 1 : scrollScale,

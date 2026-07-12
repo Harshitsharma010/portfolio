@@ -1,7 +1,5 @@
-import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
-import type { MotionValue } from "framer-motion";
-import FadeIn from "./FadeIn";
 import RoleRotator from "./RoleRotator";
 
 const StormCore = lazy(() => import("./StormCore"));
@@ -13,6 +11,12 @@ const CLOUD_TRANSITION_MS = 1450;
 const welcomeText = "Harshit Sharma builds deployable cloud, AI, and backend systems.";
 const MAINFRAME_VIDEO_SRC =
   "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260530_042513_df96a13b-6155-4f6e-8b93-c9dee66fba08.mp4";
+let gsapModule: Promise<typeof import("gsap")> | null = null;
+
+function loadGsap() {
+  gsapModule ??= import("gsap");
+  return gsapModule;
+}
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
@@ -52,6 +56,8 @@ function WelcomeIntro({
   const [typingDone, setTypingDone] = useState(Boolean(reduceMotion));
   const [actionsVisible, setActionsVisible] = useState(Boolean(reduceMotion));
   const [copied, setCopied] = useState(false);
+  const [interactiveVideo, setInteractiveVideo] = useState(false);
+  const [videoVisible, setVideoVisible] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const previousX = useRef<number | null>(null);
   const targetTime = useRef(0);
@@ -90,6 +96,13 @@ function WelcomeIntro({
     if (reduceMotion) return;
     const timer = window.setTimeout(() => setActionsVisible(true), 900);
     return () => window.clearTimeout(timer);
+  }, [reduceMotion]);
+
+  useEffect(() => {
+    if (reduceMotion) return;
+    const pointerQuery = window.matchMedia("(min-width: 768px) and (hover: hover) and (pointer: fine)");
+    const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
+    setInteractiveVideo(pointerQuery.matches && !connection?.saveData);
   }, [reduceMotion]);
 
   const copyEmail = async () => {
@@ -171,44 +184,48 @@ function WelcomeIntro({
       exit={{ opacity: 0, scale: 1.025, filter: "blur(10px)" }}
       transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
     >
-      <video
-        ref={videoRef}
-        className="preintro-source-video"
-        muted
-        playsInline
-        preload="auto"
-        onLoadedMetadata={handleLoadedMetadata}
-        onSeeked={handleSeeked}
-        aria-hidden="true"
-      >
-        <source src={MAINFRAME_VIDEO_SRC} type="video/mp4" />
-      </video>
+      <div className="preintro-static-character" aria-hidden="true">
+        <img src="/media/intro-mainframe-body.png" alt="" className="preintro-mainframe-body" />
+        <img src="/media/intro-mainframe-head.png" alt="" className="preintro-mainframe-head" />
+        <span className="preintro-screen-bloom" />
+      </div>
+      {interactiveVideo ? (
+        <video
+          ref={videoRef}
+          className={`preintro-source-video${videoVisible ? " is-visible" : ""}`}
+          muted
+          playsInline
+          preload="metadata"
+          onLoadedMetadata={handleLoadedMetadata}
+          onLoadedData={() => setVideoVisible(true)}
+          onSeeked={handleSeeked}
+          aria-hidden="true"
+        >
+          <source src={MAINFRAME_VIDEO_SRC} type="video/mp4" />
+        </video>
+      ) : null}
       <div className="preintro-source-wash" aria-hidden="true" />
       <div className="preintro-source-grain" aria-hidden="true" />
 
-      <div className="relative z-10 mx-auto flex min-h-screen max-w-[1500px] flex-col px-5 py-5 sm:px-8 md:px-10">
+      <div className="relative z-10 mx-auto flex min-h-[100dvh] max-w-[1500px] flex-col px-5 py-5 sm:px-8 md:px-10">
         <motion.header
           className="flex items-center justify-between gap-4 text-[0.95rem] font-medium text-black"
           initial={reduceMotion ? false : { opacity: 0, y: -14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
         >
-          <button type="button" onClick={onContinue} className="font-black tracking-[-0.04em]">
+          <button type="button" onClick={onContinue} className="min-h-11 font-black tracking-[-0.04em]">
             Harshit Sharma <span className="text-black/45">*</span>
           </button>
-          <div className="hidden items-center gap-1 text-black/80 md:flex" aria-hidden="true">
-            <span>Cloud systems</span>
-            <span>,</span>
-            <span>AI tools</span>
-            <span>,</span>
-            <span>deployable proof</span>
-          </div>
-          <button type="button" onClick={copyEmail} className="underline decoration-black/35 underline-offset-4 transition-opacity hover:opacity-65">
+          <p className="hidden text-black/80 md:block" aria-hidden="true">
+            Cloud systems, AI tools, deployable proof
+          </p>
+          <button type="button" onClick={copyEmail} className="min-h-11 underline decoration-black/35 underline-offset-4 transition-opacity hover:opacity-65">
             {copied ? "Email copied" : "Get in touch"}
           </button>
         </motion.header>
 
-        <section className="relative z-10 flex flex-1 flex-col justify-end pb-12 pt-20 md:justify-center md:pb-0">
+        <section className="relative z-10 flex flex-1 flex-col justify-start pb-12 pt-24 sm:pt-28 md:justify-center md:pb-0 md:pt-20">
           <motion.div
             className="preintro-source-copy max-w-[39rem]"
             initial={reduceMotion ? false : { opacity: 0, y: 20, filter: "blur(8px)" }}
@@ -250,148 +267,10 @@ function WelcomeIntro({
   );
 }
 
-function MagneticGalaxy({
-  reduceMotion,
-  scrollY,
-  scrollScale,
-  scrollOpacity,
-}: {
-  reduceMotion: boolean | null;
-  scrollY: MotionValue<number>;
-  scrollScale: MotionValue<number>;
-  scrollOpacity: MotionValue<number>;
-}) {
-  const [isActive, setIsActive] = useState(false);
-  const [ignited, setIgnited] = useState(false);
-  const [cursor, setCursor] = useState({ x: 0, y: 0 });
-
-  useEffect(() => {
-    if (reduceMotion) {
-      setIgnited(true);
-      return;
-    }
-    const timer = window.setTimeout(() => setIgnited(true), 220);
-    return () => window.clearTimeout(timer);
-  }, [reduceMotion]);
-
-  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (reduceMotion) return;
-    const rect = event.currentTarget.getBoundingClientRect();
-    setCursor({
-      x: ((event.clientX - rect.left) / rect.width - 0.5) * 2,
-      y: ((event.clientY - rect.top) / rect.height - 0.5) * 2,
-    });
-  };
-
-  return (
-    <motion.div
-      className="magnetic-galaxy group relative mx-auto aspect-square w-[min(82vw,540px)]"
-      style={{
-        y: reduceMotion ? 0 : scrollY,
-        scale: reduceMotion ? 1 : scrollScale,
-        opacity: reduceMotion ? 1 : scrollOpacity,
-      }}
-      onPointerEnter={() => setIsActive(true)}
-      onPointerMove={handlePointerMove}
-      onPointerLeave={() => {
-        setIsActive(false);
-        setCursor({ x: 0, y: 0 });
-      }}
-    >
-      <motion.div
-        className="galaxy-glow absolute inset-[8%] rounded-full"
-        aria-hidden="true"
-        animate={reduceMotion ? {} : { x: isActive ? cursor.x * 8 : 0, y: isActive ? cursor.y * 8 : 0 }}
-        transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-      />
-      <motion.div
-        className="galaxy-ripple absolute inset-[10%] rounded-full"
-        aria-hidden="true"
-        initial={reduceMotion ? false : { opacity: 0, scale: 0.66 }}
-        animate={{
-          opacity: ignited ? 1 : 0,
-          scale: ignited ? 1 : 0.66,
-          x: isActive ? cursor.x * 5 : 0,
-          y: isActive ? cursor.y * 5 : 0,
-        }}
-        transition={{ duration: 1.25, ease: [0.16, 1, 0.3, 1] }}
-      />
-      <motion.div
-        className="galaxy-ripple galaxy-ripple-b absolute inset-[20%] rounded-full"
-        aria-hidden="true"
-        initial={reduceMotion ? false : { opacity: 0, scale: 0.72 }}
-        animate={{
-          opacity: ignited ? 1 : 0,
-          scale: ignited ? 1 : 0.72,
-          x: isActive ? cursor.x * -4 : 0,
-          y: isActive ? cursor.y * -4 : 0,
-        }}
-        transition={{ duration: 1.45, delay: 0.12, ease: [0.16, 1, 0.3, 1] }}
-      />
-      <motion.span
-        className="galaxy-ignite"
-        aria-hidden="true"
-        initial={reduceMotion ? false : { opacity: 0, scale: 0.24 }}
-        animate={reduceMotion ? {} : { opacity: [0, 0.85, 0], scale: [0.24, 1.05, 1.42] }}
-        transition={{ duration: 1.35, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-      />
-      <motion.svg
-        className="pointer-events-none absolute inset-0 h-full w-full opacity-70"
-        viewBox="0 0 100 100"
-        aria-hidden="true"
-        animate={reduceMotion ? {} : { x: isActive ? cursor.x * 3 : 0, y: isActive ? cursor.y * 3 : 0 }}
-        transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-      >
-        <path className="constellation-line" d="M18 48 L34 28 L46 12 M58 82 L63 55 L79 42 L84 66" />
-        <path className="constellation-line constellation-line-soft" d="M22 72 L41 67 L58 82" />
-      </motion.svg>
-
-      <motion.span
-        className="galaxy-node galaxy-node-a"
-        animate={reduceMotion ? {} : { rotate: isActive ? 22 : [0, 360] }}
-        transition={{ duration: isActive ? 0.6 : 18, repeat: isActive ? 0 : Infinity, ease: "linear" }}
-      ><span /></motion.span>
-      <motion.span
-        className="galaxy-node galaxy-node-b"
-        animate={reduceMotion ? {} : { rotate: isActive ? -18 : [360, 0] }}
-        transition={{ duration: isActive ? 0.6 : 22, repeat: isActive ? 0 : Infinity, ease: "linear" }}
-      ><span /></motion.span>
-      <motion.span
-        className="galaxy-node galaxy-node-c"
-        animate={reduceMotion ? {} : { rotate: isActive ? 14 : [0, 360] }}
-        transition={{ duration: isActive ? 0.6 : 28, repeat: isActive ? 0 : Infinity, ease: "linear" }}
-      ><span /></motion.span>
-      <motion.div
-        className="galaxy-proof-card"
-        initial={reduceMotion ? false : { opacity: 0, y: 18, filter: "blur(8px)" }}
-        animate={reduceMotion ? {} : { opacity: 1, y: [0, -6, 0], filter: "blur(0px)" }}
-        transition={{ opacity: { duration: 0.8, delay: 0.7 }, y: { duration: 6, repeat: Infinity, ease: "easeInOut" }, filter: { duration: 0.8, delay: 0.7 } }}
-      >
-        <span>Deployable systems</span>
-        <strong>AWS / Docker / Terraform / CI/CD / logs</strong>
-      </motion.div>
-
-      <motion.div
-        className="galaxy-core-wrap"
-        animate={reduceMotion ? {} : { x: isActive ? cursor.x * 10 : 0, y: isActive ? cursor.y * 8 : 0 }}
-        transition={{ duration: 0.48, ease: [0.16, 1, 0.3, 1] }}
-      >
-        <div className="galaxy-core relative aspect-square overflow-hidden rounded-full border border-white/35 bg-white/[0.06] p-2 backdrop-blur-xl">
-          <img
-            src="https://github.com/Harshitsharma010.png"
-            alt="Harshit Sharma"
-            className="h-full w-full rounded-full object-cover contrast-[1.04] saturate-[1.08]"
-            loading="eager"
-          />
-        </div>
-      </motion.div>
-    </motion.div>
-  );
-}
-
 export default function Hero() {
   const introVideoRef = useRef<HTMLVideoElement | null>(null);
   const heroRef = useRef<HTMLElement | null>(null);
+  const heroSequenceRef = useRef<HTMLDivElement | null>(null);
   const reduceMotion = useReducedMotion();
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
   const galaxyY = useTransform(scrollYProgress, [0, 1], [0, -70]);
@@ -412,6 +291,7 @@ export default function Hero() {
     },
   );
   const [introVideoReady, setIntroVideoReady] = useState(false);
+  const [stormEnabled, setStormEnabled] = useState(() => introPhase !== "welcome");
   const finishIntro = useCallback(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
     setIntroPhase("done");
@@ -434,6 +314,52 @@ export default function Hero() {
     const timer = window.setTimeout(startTrainVideo, PRE_INTRO_MS);
     return () => window.clearTimeout(timer);
   }, [introPhase]);
+
+  useEffect(() => {
+    if (introPhase !== "welcome") {
+      setStormEnabled(true);
+      if (!reduceMotion) void loadGsap();
+    }
+  }, [introPhase, reduceMotion]);
+
+  useLayoutEffect(() => {
+    if (introPhase !== "done" || !heroSequenceRef.current || reduceMotion) return;
+
+    let cancelled = false;
+    let context: { revert: () => void } | undefined;
+
+    void loadGsap().then(({ gsap }) => {
+      if (cancelled || !heroSequenceRef.current) return;
+      context = gsap.context(() => {
+        const timeline = gsap.timeline({ defaults: { ease: "power4.out" } });
+        timeline
+          .from("[data-hero-copy]", {
+            x: -34,
+            autoAlpha: 0,
+            filter: "blur(9px)",
+            duration: 0.78,
+            stagger: 0.1,
+            clearProps: "transform,opacity,visibility,filter",
+          })
+          .from(
+            "[data-hero-core]",
+            {
+              scale: 0.9,
+              autoAlpha: 0,
+              filter: "blur(14px)",
+              duration: 1.05,
+              clearProps: "transform,opacity,visibility,filter",
+            },
+            0.08,
+          );
+      }, heroSequenceRef);
+    });
+
+    return () => {
+      cancelled = true;
+      context?.revert();
+    };
+  }, [introPhase, reduceMotion]);
 
   useEffect(() => {
     if (introPhase !== "clouds") return;
@@ -508,7 +434,7 @@ export default function Hero() {
   }, [introActive]);
 
   return (
-    <section ref={heroRef} id="home" className="relative flex min-h-screen w-full flex-col overflow-hidden bg-[#09060B] text-[#D7E2EA]">
+    <section ref={heroRef} id="home" className="relative flex min-h-[100dvh] w-full flex-col overflow-hidden bg-[#09060B] text-[#D7E2EA]">
       <AnimatePresence>
       {introPhase !== "done" ? (
         <motion.div
@@ -534,7 +460,7 @@ export default function Hero() {
             <button
               type="button"
               onClick={finishIntro}
-              className="absolute right-5 top-5 z-50 rounded-full border border-white bg-white px-5 py-3 text-[0.7rem] font-bold uppercase tracking-[0.16em] text-black shadow-[0_12px_38px_rgba(0,0,0,0.38)] transition-transform hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-white sm:right-8 sm:top-7"
+              className="absolute bottom-5 right-5 z-50 min-h-11 rounded-full bg-white px-5 py-3 text-[0.7rem] font-bold uppercase tracking-[0.16em] text-black shadow-[0_8px_8px_rgba(0,0,0,0.28)] transition-transform hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white sm:bottom-7 sm:right-8"
             >
               Skip to portfolio
             </button>
@@ -555,7 +481,7 @@ export default function Hero() {
               src="/media/intro-hero-20260703.mp4"
               muted
               playsInline
-              preload="auto"
+              preload="metadata"
               onPlaying={() => setIntroVideoReady(true)}
               onEnded={startIntroTransition}
               onError={startIntroTransition}
@@ -604,30 +530,33 @@ export default function Hero() {
       <div className="film-grain pointer-events-none absolute inset-0 z-[1]" aria-hidden="true" />
       <div className="magnetic-hero-field pointer-events-none absolute inset-0 z-[2]" aria-hidden="true" />
       <div className="absolute inset-0 z-10 cinema-vignette" />
-      <div className="relative z-20 grid min-h-screen items-center gap-12 px-5 pb-16 pt-28 sm:px-8 md:px-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-8 lg:pt-24">
+      <div
+        ref={heroSequenceRef}
+        className="relative z-20 mx-auto grid min-h-[100dvh] w-full max-w-[1500px] items-center gap-10 px-5 pb-16 pt-28 sm:px-8 md:px-10 lg:grid-cols-[1fr_0.95fr] lg:gap-10 lg:pt-24"
+      >
         <div className="max-w-2xl">
-          <FadeIn delay={0.08} y={30}>
-            <h1 className="hero-heading max-w-[8.9ch] text-[clamp(3rem,7vw,6rem)] font-black uppercase leading-[0.84] tracking-[-0.024em] text-balance">
+          <div data-hero-copy>
+            <h1 className="hero-heading max-w-[9.2ch] text-[clamp(3rem,7vw,6rem)] font-black uppercase leading-[0.86] tracking-[-0.024em] text-balance">
               Cloud, DevOps &amp; AI Engineer
             </h1>
-          </FadeIn>
+          </div>
 
-          <FadeIn delay={0.18} y={24}>
+          <div data-hero-copy>
             <p className="mt-7 text-[clamp(1.2rem,2.5vw,2rem)] font-medium uppercase tracking-[0.08em] text-[#D7E2EA]">
               <RoleRotator />
             </p>
             <p className="mt-5 max-w-xl text-base font-light leading-7 text-[#D7E2EA]/[0.72] sm:text-lg">
-              I build deployable cloud systems, backend services, and AI-driven tools with real architecture, CI/CD, monitoring, and documented tradeoffs.
+              I build deployable AWS systems and AI-backed products, from Terraform and CI/CD to monitored APIs and reviewer-ready proof.
             </p>
-          </FadeIn>
+          </div>
 
-          <FadeIn delay={0.28} y={20}>
+          <div data-hero-copy>
             <div className="mt-9 flex flex-wrap gap-3">
               <motion.a
                 href="#projects"
                 whileHover={{ y: -2, scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="rounded-full bg-[#D7E2EA] px-7 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-[#0C0C0C] transition-colors hover:bg-white sm:px-8 sm:py-3.5"
+                className="inline-flex min-h-12 items-center rounded-full bg-[#D7E2EA] px-7 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-[#0C0C0C] transition-colors hover:bg-white sm:px-8 sm:py-3.5"
               >
                 View Projects
               </motion.a>
@@ -635,25 +564,32 @@ export default function Hero() {
                 href="#proof"
                 whileHover={{ y: -2, scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="rounded-full border border-[#D7E2EA]/[0.3] bg-white/[0.035] px-7 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-[#D7E2EA] backdrop-blur-xl transition-colors hover:border-[#D7E2EA]/[0.62] hover:bg-white/[0.08] sm:px-8 sm:py-3.5"
+                className="inline-flex min-h-12 items-center rounded-full border border-[#D7E2EA]/[0.3] bg-white/[0.035] px-7 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-[#D7E2EA] backdrop-blur-xl transition-colors hover:border-[#D7E2EA]/[0.62] hover:bg-white/[0.08] sm:px-8 sm:py-3.5"
               >
                 See Live Proof
               </motion.a>
             </div>
-          </FadeIn>
+            <p className="mt-6 text-sm font-light tracking-[0.04em] text-[#D7E2EA]/55">
+              AWS infrastructure / Terraform / Docker / FastAPI / applied ML
+            </p>
+          </div>
 
         </div>
 
-        <FadeIn delay={0.2} y={34} className="relative">
-          <Suspense fallback={<div className="aspect-[1.08] w-[min(94vw,660px)]" aria-hidden="true" />}>
-            <StormCore
-              reduceMotion={reduceMotion}
-              scrollY={galaxyY}
-              scrollScale={galaxyScale}
-              scrollOpacity={galaxyOpacity}
-            />
-          </Suspense>
-        </FadeIn>
+        <div data-hero-core className="relative flex justify-center lg:justify-end">
+          {stormEnabled ? (
+            <Suspense fallback={<div className="aspect-square w-[min(88vw,560px)]" aria-hidden="true" />}>
+              <StormCore
+                reduceMotion={reduceMotion}
+                scrollY={galaxyY}
+                scrollScale={galaxyScale}
+                scrollOpacity={galaxyOpacity}
+              />
+            </Suspense>
+          ) : (
+            <div className="aspect-square w-[min(88vw,560px)]" aria-hidden="true" />
+          )}
+        </div>
       </div>
     </section>
   );

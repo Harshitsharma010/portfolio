@@ -18,14 +18,14 @@ const trustnetSteps = [
     shortLabel: "Browser",
     label: "Browser signal",
     title: "A suspicious link enters the workflow.",
-    detail: "A Manifest V3 Chrome extension gives the user a risk signal where suspicious URLs are actually encountered.",
+    detail: "The Manifest V3 extension shows a risk signal where users encounter suspicious URLs.",
     proof: "Chrome extension",
   },
   {
     number: "02",
     shortLabel: "Features",
     label: "Feature extraction",
-    title: "The URL becomes inspectable data.",
+    title: "The system extracts URL features.",
     detail: "TrustNet extracts URL-level signals such as length, subdomain count, TLD, HTTPS presence, and suspicious keywords.",
     proof: "Python + scikit-learn",
   },
@@ -34,17 +34,23 @@ const trustnetSteps = [
     shortLabel: "API",
     label: "Model inference",
     title: "The API returns a risk prediction.",
-    detail: "The model serves predictions through backend APIs consumed by the extension and the React dashboard.",
-    proof: "Lambda API",
+    detail: "Backend APIs serve model predictions to the extension and React dashboard.",
+    proof: "Backend API contract",
   },
   {
     number: "04",
     shortLabel: "AWS",
-    label: "Cloud proof",
-    title: "The system has a deployment path.",
+    label: "Deployment evidence",
+    title: "The repository documents the AWS path.",
     detail: "AWS deployment notes cover Lambda containers, API Gateway, ECR, Amplify, CloudWatch logging, and security considerations.",
-    proof: "AWS deployment path",
+    proof: "Deployment notes",
   },
+];
+
+const verificationRows = [
+  { label: "Live interface", value: "AWS Amplify" },
+  { label: "User surface", value: "Manifest V3 extension" },
+  { label: "Deployment record", value: "Lambda / API Gateway / ECR / CloudWatch" },
 ];
 
 const architectureIcons = [MonitorUp, Binary, Waypoints, CloudCog];
@@ -57,13 +63,13 @@ function StageContent({ step }: { step: (typeof trustnetSteps)[number] }) {
         <span className="h-px w-12 bg-[#D9B86F]" />
         <span>{step.label}</span>
       </div>
-      <h3 className="mt-7 max-w-2xl text-[clamp(2rem,4.5vw,4.4rem)] font-black uppercase leading-[0.88] tracking-[-0.04em] text-white">
+      <h3 className="mt-5 max-w-2xl text-[clamp(2rem,4.5vw,4.4rem)] font-black uppercase leading-[0.88] tracking-[-0.04em] text-white">
         {step.title}
       </h3>
-      <p className="mt-6 max-w-xl text-base font-light leading-7 text-white/[0.68] sm:text-lg">
+      <p className="mt-4 max-w-xl text-base font-light leading-7 text-white/[0.68] sm:text-lg">
         {step.detail}
       </p>
-      <p className="mt-8 text-xs font-semibold uppercase tracking-[0.18em] text-white/50">Proof: {step.proof}</p>
+      <p className="mt-5 text-xs font-semibold uppercase tracking-[0.18em] text-white/50">Proof: {step.proof}</p>
     </>
   );
 }
@@ -116,32 +122,40 @@ export default function ProofSection() {
           <div className="grid gap-8 lg:grid-cols-[0.7fr_1.3fr] lg:items-end">
             <FadeIn>
               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/50">Strongest project / AWS + ML</p>
-              <h2 className="mt-5 text-[clamp(3rem,8vw,6rem)] font-black uppercase leading-[0.86] tracking-[-0.04em]">TrustNet<br />CyberCop.</h2>
+              <h2 className="mt-5 text-[clamp(2.8rem,6.2vw,5rem)] font-black uppercase leading-[0.86] tracking-[-0.04em]">TrustNet<br />CyberCop.</h2>
             </FadeIn>
             <FadeIn delay={0.08}>
               <p className="max-w-2xl text-base font-light leading-7 text-white/[0.68] sm:text-lg">
-                A phishing detection system shown as a real flow: browser signal, model inference, API delivery, and an AWS deployment path a reviewer can inspect.
+                A phishing detection system with a live AWS dashboard, browser extension, model inference API, and documented deployment path.
               </p>
             </FadeIn>
           </div>
 
-          <div className="mt-12 grid gap-12 lg:mt-8 lg:grid-cols-[0.62fr_1.38fr] lg:items-start">
+          <div className="mt-12 grid gap-12 lg:mt-5 lg:grid-cols-[0.62fr_1.38fr] lg:items-start">
             <div>
               <div className="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.18em] text-white/50">
                 <ShieldCheck size={18} />
                 <span>Live proof</span>
               </div>
-              <p className="mt-5 max-w-xs text-sm font-light leading-6 text-white/[0.64]">
-                TrustNet connects a browser interaction to an ML service and a documented AWS deployment path.
+              <p className="mt-5 max-w-xs text-sm font-light leading-6 text-white/[0.64] lg:mt-3">
+                Use the live interface for the product flow and the repository for architecture and deployment details.
               </p>
-              <div className="mt-7 flex flex-wrap gap-3">
-                <a href="https://main.dqqhdlk8jbmoh.amplifyapp.com" className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-[#100A13] transition-transform hover:-translate-y-0.5">
+              <div className="mt-7 flex flex-wrap gap-3 lg:mt-5">
+                <a href="https://main.dqqhdlk8jbmoh.amplifyapp.com" target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-2 rounded-full bg-white px-5 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-[#100A13] transition-transform hover:-translate-y-0.5">
                   <ExternalLink size={15} /> Live dashboard
                 </a>
-                <a href="https://github.com/Harshitsharma010/trustnet-cybercop" className="inline-flex items-center gap-2 rounded-full border border-white/25 px-5 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-white transition-colors hover:bg-white/10">
+                <a href="https://github.com/Harshitsharma010/trustnet-cybercop" target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-2 rounded-full border border-white/25 px-5 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-white transition-colors hover:bg-white/10">
                   <Code2 size={15} /> Inspect repo
                 </a>
               </div>
+              <dl className="mt-8 max-w-sm divide-y divide-white/10 border-y border-white/10 lg:mt-5">
+                {verificationRows.map((row) => (
+                  <div key={row.label} className="grid grid-cols-[0.78fr_1.22fr] gap-4 py-2.5 text-xs leading-5">
+                    <dt className="font-medium uppercase tracking-[0.12em] text-white/40">{row.label}</dt>
+                    <dd className="text-right font-light text-white/72">{row.value}</dd>
+                  </div>
+                ))}
+              </dl>
             </div>
 
             {!staticLayout ? (
@@ -169,7 +183,7 @@ export default function ProofSection() {
                   </div>
                 </div>
 
-                <div className="relative mt-5 min-h-[280px] overflow-hidden">
+                <div className="relative mt-4 min-h-[250px] overflow-hidden">
                   <AnimatePresence mode="wait" initial={false}>
                     <motion.article
                       key={trustnetSteps[activeStage].number}
@@ -188,7 +202,7 @@ export default function ProofSection() {
             {staticLayout ? <StaticStages expanded /> : <StaticStages />}
           </div>
 
-          <div className="mt-8 flex items-center justify-between border-t border-white/15 pt-4 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-white/45 lg:mt-5">
+          <div className="mt-8 flex items-center justify-between border-t border-white/15 pt-4 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-white/45 lg:mt-3">
             <span className="hidden lg:inline">{staticLayout ? "Architecture overview" : "Scroll to trace the system"}</span>
             <span>TrustNet / 04 stages</span>
           </div>

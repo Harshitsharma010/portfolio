@@ -21,7 +21,7 @@ export default function HowIBuildSection() {
               How I build.
             </h2>
             <p className="mt-7 max-w-md text-base font-light leading-7 text-[#D7E2EA]/[0.68] sm:text-lg">
-              The pattern behind the projects: make the system useful, deployable, inspectable, and honest about limits.
+              Every project follows the same standard: useful, deployable, inspectable, and honest about its limits.
             </p>
           </div>
         </FadeIn>

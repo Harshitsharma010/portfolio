@@ -43,27 +43,32 @@ export default function ContactSection() {
             Let's build something useful.
           </h2>
           <p className="mt-8 max-w-2xl text-base font-light leading-7 text-[#D7E2EA]/[0.7] sm:text-lg">
-            I am looking for Cloud Engineering, Junior DevOps, Infrastructure, or Technical Consulting roles where shipping, troubleshooting, documenting, and improving systems matters.
+            I am seeking entry-level Cloud Engineering, DevOps, Infrastructure, or Technical Consulting roles where I can ship, troubleshoot, document, and improve real systems.
           </p>
         </FadeIn>
 
         <div className="grid gap-3">
           {links.map(({ label, value, href, icon: Icon }, index) => (
             <FadeIn key={label} delay={index * 0.08}>
-              <div className="flex flex-col gap-4 border border-[#D7E2EA]/[0.16] bg-[#D7E2EA]/[0.08] p-4 text-left transition-colors hover:bg-[#D7E2EA]/[0.13] sm:flex-row sm:items-center sm:justify-between sm:gap-5">
+              <div className="flex flex-col gap-4 rounded-xl border border-[#D7E2EA]/[0.16] bg-[#D7E2EA]/[0.08] p-4 text-left transition-colors hover:bg-[#D7E2EA]/[0.13] sm:flex-row sm:items-center sm:justify-between sm:gap-5">
                 <span className="flex items-center gap-3">
                   <Icon size={18} />
                   <span className="font-medium uppercase tracking-[0.16em]">{label}</span>
                 </span>
                 <span className="flex min-w-0 flex-wrap items-center gap-3 text-sm font-light text-[#D7E2EA]/[0.68] sm:justify-end sm:text-right">
-                  <a href={href} className="max-w-full break-words transition-colors hover:text-[#D7E2EA]">
+                  <a
+                    href={href}
+                    target={href.startsWith("http") ? "_blank" : undefined}
+                    rel={href.startsWith("http") ? "noreferrer" : undefined}
+                    className="max-w-full break-words transition-colors hover:text-[#D7E2EA]"
+                  >
                     {value}
                   </a>
                   {label === "Email" ? (
                     <button
                       type="button"
                       onClick={copyEmail}
-                      className="rounded-full border border-[#D7E2EA]/[0.22] px-3 py-1 text-xs font-medium uppercase tracking-[0.14em] text-[#D7E2EA] transition-colors hover:bg-[#D7E2EA]/[0.12] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D7E2EA]"
+                      className="min-h-11 rounded-full border border-[#D7E2EA]/[0.22] px-4 py-2 text-xs font-medium uppercase tracking-[0.14em] text-[#D7E2EA] transition-colors hover:bg-[#D7E2EA]/[0.12] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D7E2EA]"
                     >
                       {copied ? "Copied" : "Copy"}
                     </button>
