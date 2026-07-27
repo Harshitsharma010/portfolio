@@ -1,193 +1,141 @@
-import { ChevronDown, Code2, ExternalLink } from "lucide-react";
-import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
-import { type CSSProperties, useRef } from "react";
+import { ArrowUpRight, Code2, ExternalLink } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
 import FadeIn from "./FadeIn";
 import { projects, type Project } from "../data/sections";
 
-const projectAccents = ["255, 45, 107", "229, 199, 122", "215, 226, 234", "184, 78, 142"];
+const projectAccents = ["255, 66, 112", "229, 190, 96", "196, 211, 203", "76, 196, 185"];
 
-function ProjectCard({ project, index, total }: { project: Project; index: number; total: number }) {
-  const ref = useRef<HTMLDivElement | null>(null);
+const visualMap: Record<string, { image: string; alt: string; note: string }> = {
+  "TrustNet CyberCop": {
+    image: "/media/projects/trustnet-cover.png",
+    alt: "Crimson glass security shield surrounded by threat signals",
+    note: "Threat intelligence",
+  },
+  "AWS ECS Fargate Terraform CI/CD": {
+    image: "/media/projects/ecs-cover.png",
+    alt: "Warm signal travelling through a dark cloud deployment landscape",
+    note: "Deployment in motion",
+  },
+  "Local AI RAG Assistant": {
+    image: "/media/projects/rag-cover.png",
+    alt: "Floating documents converging around a private local intelligence core",
+    note: "Private retrieval",
+  },
+  "Nexus Command Center": {
+    image: "/media/projects/nexus-cover.png",
+    alt: "Colored translucent forms moving together through a dark workspace",
+    note: "Work in flow",
+  },
+};
+
+function ProjectCard({ project, index }: { project: Project; index: number }) {
   const reduceMotion = useReducedMotion();
+  const visual = visualMap[project.title];
+  const destination = project.liveHref ?? project.href;
   const isFeatured = index === 0;
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start 0.78", "end 0.22"],
-  });
-  const targetScale = 1 - (total - 1 - index) * 0.03;
-  const scale = useTransform(scrollYProgress, [0, 1], [1, targetScale]);
-  const cardStyle = {
-    "--project-card-offset": `${index * 28}px`,
-    "--project-accent": projectAccents[index % projectAccents.length],
-  } as CSSProperties;
+  const gridSpan = index === 0 || index === 3 ? "md:col-span-2 lg:col-span-7" : "lg:col-span-5";
+  const cardStyle = { "--project-accent": projectAccents[index] } as React.CSSProperties;
 
   return (
-    <div ref={ref} className={`relative lg:h-[130vh] ${index > 0 ? "lg:-mt-[42vh]" : ""}`}>
-      <motion.article
-        className={`project-case-card group relative overflow-hidden rounded-xl border border-[#D7E2EA]/[0.18] p-5 text-[#D7E2EA] lg:sticky lg:top-[calc(6rem+var(--project-card-offset))] lg:max-h-[calc(100vh-7rem)] xl:top-[calc(8rem+var(--project-card-offset))] ${
-          isFeatured ? "md:p-7" : "md:p-6"
-        }`}
-        style={{
-          ...cardStyle,
-          scale: reduceMotion ? 1 : scale,
-          zIndex: index + 1,
-          transformOrigin: "50% 0%",
-        }}
+    <motion.article
+      initial={reduceMotion ? false : { opacity: 0, y: 22 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.18 }}
+      transition={{ duration: 0.5, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
+      className={`project-showcase-card group relative overflow-hidden rounded-lg border border-white/[0.12] ${gridSpan}`}
+      style={cardStyle}
+    >
+      <a
+        href={destination}
+        target="_blank"
+        rel="noreferrer"
+        aria-label={`Open ${project.title}${project.liveHref ? " live project" : " repository"}`}
+        className={`project-cover relative block overflow-hidden ${isFeatured ? "min-h-[29rem] sm:min-h-[34rem]" : "min-h-[25rem] sm:min-h-[29rem]"}`}
       >
-      <div className="project-card-atmosphere pointer-events-none absolute inset-0" aria-hidden="true" />
-      <div className="project-card-signal pointer-events-none absolute right-8 top-7 hidden w-52 lg:block" aria-hidden="true">
-        <span /><span /><span /><i />
-      </div>
-      <div className="relative z-10 grid gap-8 lg:grid-cols-[0.46fr_0.54fr]">
-        <div className="flex min-h-full flex-col justify-between gap-8">
+        <img src={visual.image} alt={visual.alt} className="project-cover-image absolute inset-0 h-full w-full object-cover" />
+        <div className="project-cover-veil absolute inset-0" aria-hidden="true" />
+        <div className="project-cover-noise pointer-events-none absolute inset-0" aria-hidden="true" />
+
+        <div className="absolute left-4 right-4 top-4 flex items-center justify-between gap-3 sm:left-5 sm:right-5 sm:top-5">
+          <span className="border border-white/20 bg-black/25 px-2.5 py-1.5 text-[0.58rem] font-semibold uppercase tracking-[0.16em] text-white/76 backdrop-blur-sm">
+            {project.number}
+          </span>
+          <span className="max-w-[11rem] text-right text-[0.58rem] font-semibold uppercase tracking-[0.16em] text-white/65 drop-shadow-[0_1px_8px_rgba(0,0,0,0.9)]">
+            {visual.note}
+          </span>
+        </div>
+
+        <div className="absolute bottom-4 left-4 right-4 flex translate-y-1 items-end justify-between gap-4 transition-transform duration-300 ease-out group-hover:translate-y-0 sm:bottom-5 sm:left-5 sm:right-5">
           <div>
-            <div className="flex items-center justify-between gap-5 border-b border-[#D7E2EA]/[0.16] pb-5">
-              <span className="text-[clamp(2.5rem,6vw,5.2rem)] font-black leading-none tracking-[-0.055em] text-[#F4F7F8]">
-                {project.number}
-              </span>
-              <span className="text-right text-xs font-medium uppercase tracking-[0.2em] text-[#D7E2EA]/[0.6]">
-                {project.status}
-              </span>
-            </div>
-            <p className="mt-6 text-xs font-medium uppercase tracking-[0.22em] text-[#D7E2EA]/[0.55]">
-              {project.subtitle}
-            </p>
-            <h3 className="mt-4 text-[clamp(2rem,4.4vw,4.7rem)] font-black uppercase leading-[0.86] tracking-[-0.04em] text-[#F4F7F8]">
+            <p className="text-[0.6rem] font-medium uppercase tracking-[0.19em] text-white/60">{project.subtitle}</p>
+            <h3 className={`mt-2 max-w-xl font-black uppercase leading-[0.89] tracking-[-0.04em] text-white drop-shadow-[0_3px_18px_rgba(0,0,0,0.9)] ${isFeatured ? "text-[clamp(2.25rem,4.8vw,4.65rem)]" : "text-[clamp(2rem,3.5vw,3.25rem)]"}`}>
               {project.title}
             </h3>
-            <p className="mt-6 max-w-xl text-[clamp(1.05rem,2vw,1.45rem)] font-medium leading-tight tracking-[-0.015em] text-[#D7E2EA]">
-              {project.oneLiner}
-            </p>
           </div>
+          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-white/30 bg-white/[0.09] text-white backdrop-blur-sm transition-transform duration-300 group-hover:-translate-y-1 group-hover:rotate-45 group-hover:bg-white/20">
+            <ArrowUpRight size={18} aria-hidden="true" />
+          </span>
+        </div>
+      </a>
 
-          <div className="flex flex-wrap gap-2">
-            {project.proof.map((item) => (
-              <span
-                key={item}
-                className="border border-[#D7E2EA]/[0.28] px-3 py-2 text-xs font-medium uppercase tracking-[0.13em] text-[#D7E2EA]/[0.88]"
-              >
-                {item}
-              </span>
-            ))}
-          </div>
+      <div className="relative z-10 flex flex-col gap-4 bg-[#0C0C0C] p-4 sm:p-5">
+        <p className="max-w-2xl text-sm leading-6 text-[#D7E2EA]/[0.72]">{project.oneLiner}</p>
+
+        <div className="flex flex-wrap gap-1.5">
+          {project.proof.map((item) => (
+            <span key={item} className="border border-[#D7E2EA]/[0.15] px-2 py-1 text-[0.57rem] font-medium uppercase tracking-[0.11em] text-[#D7E2EA]/[0.68]">
+              {item}
+            </span>
+          ))}
         </div>
 
-        <div className="space-y-7">
-          <div className="grid gap-5 md:grid-cols-2">
-            <div>
-              <h4 className="text-sm font-semibold uppercase tracking-[0.18em] text-[#F4F7F8]">
-                Problem
-              </h4>
-              <p className="mt-3 text-sm font-light leading-6 text-[#D7E2EA]/[0.72]">
-                {project.problem}
-              </p>
-            </div>
-            <div>
-              <h4 className="text-sm font-semibold uppercase tracking-[0.18em] text-[#F4F7F8]">
-                Why it matters
-              </h4>
-              <p className="mt-3 text-sm font-light leading-6 text-[#D7E2EA]/[0.72]">
-                {project.description}
-              </p>
-            </div>
-          </div>
-
-          <div className="hidden border-y border-[#D7E2EA]/[0.16] py-6 md:block">
-            <h4 className="text-sm font-semibold uppercase tracking-[0.18em] text-[#F4F7F8]">
-              Build notes
-            </h4>
-            <div className="mt-5 grid gap-4">
-              {project.build.map((item) => (
-                <p key={item} className="text-sm font-light leading-6 text-[#D7E2EA]/[0.74]">
-                  {item}
-                </p>
-              ))}
-            </div>
-          </div>
-
-          <details className="project-build-details border-y border-[#D7E2EA]/[0.16] py-1 md:hidden">
-            <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-4 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-[#F4F7F8]">
-              Build notes
-              <ChevronDown className="h-4 w-4 transition-transform" aria-hidden="true" />
-            </summary>
-            <div className="grid gap-4 pb-5 pt-2">
-              {project.build.map((item) => (
-                <p key={item} className="text-sm font-light leading-6 text-[#D7E2EA]/[0.74]">
-                  {item}
-                </p>
-              ))}
-            </div>
-          </details>
-
-          <div className="flex flex-wrap gap-2">
-            {project.stack.map((tech) => (
-              <span
-                key={tech}
-                className="bg-[#D7E2EA]/[0.09] px-3 py-1.5 text-xs font-light text-[#D7E2EA]/[0.82]"
-              >
-                {tech}
-              </span>
-            ))}
-          </div>
-
-          <div className="flex flex-wrap gap-3">
-            <motion.a
-              href={project.href}
-              target="_blank"
-              rel="noreferrer"
-              whileHover={{ y: -2 }}
-              whileTap={{ scale: 0.98 }}
-              className="inline-flex min-h-12 items-center gap-2 rounded-full bg-[#D7E2EA] px-5 py-3 text-sm font-medium uppercase tracking-[0.14em] text-[#0C0C0C] transition-colors hover:bg-white"
-            >
-              <Code2 size={16} />
-              Inspect repo
-            </motion.a>
-            {project.liveHref ? (
-              <motion.a
-                href={project.liveHref}
-                target="_blank"
-                rel="noreferrer"
-                whileHover={{ y: -2 }}
-                whileTap={{ scale: 0.98 }}
-                className="inline-flex min-h-12 items-center gap-2 rounded-full border border-[#D7E2EA]/[0.55] px-5 py-3 text-sm font-medium uppercase tracking-[0.14em] text-[#D7E2EA] transition-colors hover:bg-[#D7E2EA]/[0.12]"
-              >
-                <ExternalLink size={16} />
-                Open live app
-              </motion.a>
-            ) : null}
-          </div>
+        <div className="flex flex-wrap items-center gap-3 border-t border-[#D7E2EA]/[0.1] pt-3">
+          <a
+            href={destination}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-[#F4F7F8] transition-colors hover:text-[rgb(var(--project-accent))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+          >
+            <ExternalLink size={14} />
+            {project.liveHref ? "Open project" : "Inspect build"}
+          </a>
+          <a
+            href={project.href}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-[#D7E2EA]/[0.54] transition-colors hover:text-[#F4F7F8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+          >
+            <Code2 size={14} />
+            GitHub
+          </a>
         </div>
       </div>
-      </motion.article>
-    </div>
+    </motion.article>
   );
 }
 
 export default function ProjectsSection() {
   return (
-    <section
-      id="projects"
-      className="relative z-20 bg-[#0C0C0C] px-5 py-20 text-[#D7E2EA] sm:px-8 sm:py-24 md:px-10 md:py-32"
-    >
+    <section id="projects" className="relative z-20 bg-[#0C0C0C] px-5 py-20 text-[#D7E2EA] sm:px-8 sm:py-24 md:px-10 md:py-28">
       <div className="film-grain pointer-events-none absolute inset-0 opacity-35" aria-hidden="true" />
-      <div className="relative z-10 mx-auto mb-16 max-w-7xl sm:mb-20">
+      <div className="relative z-10 mx-auto mb-14 max-w-7xl sm:mb-16">
         <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
           <FadeIn>
-            <h2 className="text-[clamp(3.3rem,9vw,6rem)] font-black uppercase leading-[0.86] tracking-[-0.035em] text-[#F4F7F8]">
-              Projects with evidence.
+            <h2 className="text-[clamp(3.1rem,8vw,5.7rem)] font-black uppercase leading-[0.86] tracking-[-0.035em] text-[#F4F7F8]">
+              Choose a world to inspect.
             </h2>
           </FadeIn>
           <FadeIn delay={0.08}>
             <p className="max-w-2xl text-base font-light leading-7 text-[#D7E2EA]/[0.72] sm:text-lg">
-              Each case study covers the problem, engineering decisions, inspectable evidence, and the repository or live application.
+              Each cover opens the real project. The artwork gives the first impression; the live app and repository carry the proof.
             </p>
           </FadeIn>
         </div>
       </div>
 
-      <div className="relative z-10 mx-auto grid max-w-7xl gap-5 lg:gap-0">
+      <div className="relative z-10 mx-auto grid max-w-7xl gap-5 md:grid-cols-2 lg:grid-cols-12">
         {projects.map((project, index) => (
-          <ProjectCard key={project.title} project={project} index={index} total={projects.length} />
+          <ProjectCard key={project.title} project={project} index={index} />
         ))}
       </div>
     </section>
