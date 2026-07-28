@@ -64,18 +64,28 @@ function GreetingOverlay() {
 function WelcomeIntro({
   reduceMotion,
   onContinue,
+  onReady,
 }: {
   reduceMotion: boolean | null;
   onContinue: () => void;
+  onReady: () => void;
 }) {
   const [typedText, setTypedText] = useState(reduceMotion ? welcomeText : "");
   const [typingDone, setTypingDone] = useState(Boolean(reduceMotion));
   const [actionsVisible, setActionsVisible] = useState(Boolean(reduceMotion));
+  const [videoFrameReady, setVideoFrameReady] = useState(false);
   const [copied, setCopied] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const readyReported = useRef(false);
   const previousX = useRef<number | null>(null);
   const targetTime = useRef(0);
   const seeking = useRef(false);
+
+  const reportReady = useCallback(() => {
+    if (readyReported.current) return;
+    readyReported.current = true;
+    onReady();
+  }, [onReady]);
 
   useEffect(() => {
     if (reduceMotion) {
@@ -111,6 +121,11 @@ function WelcomeIntro({
     const timer = window.setTimeout(() => setActionsVisible(true), 400);
     return () => window.clearTimeout(timer);
   }, [reduceMotion]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(reportReady, 1800);
+    return () => window.clearTimeout(timer);
+  }, [reportReady]);
 
   useEffect(() => {
     if (reduceMotion) return;
@@ -162,6 +177,10 @@ function WelcomeIntro({
     if (video) targetTime.current = video.currentTime;
   };
 
+  const handleLoadedData = () => {
+    setVideoFrameReady(true);
+  };
+
   const handleSeeked = () => {
     const video = videoRef.current;
     if (!video) {
@@ -184,13 +203,24 @@ function WelcomeIntro({
       exit={{ opacity: 0, scale: 1.025, filter: "blur(10px)" }}
       transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
     >
+      <img
+        className="preintro-source-poster"
+        src="/media/intro-mainframe-poster.png"
+        alt=""
+        fetchPriority="high"
+        decoding="sync"
+        onLoad={reportReady}
+        onError={reportReady}
+        aria-hidden="true"
+      />
       <video
         ref={videoRef}
-        className="preintro-source-video"
+        className={`preintro-source-video${videoFrameReady ? " is-ready" : ""}`}
         muted
         playsInline
-        preload="auto"
+        preload="metadata"
         onLoadedMetadata={handleLoadedMetadata}
+        onLoadedData={handleLoadedData}
         onSeeked={handleSeeked}
         aria-hidden="true"
       >
@@ -284,6 +314,7 @@ export default function Hero() {
     },
   );
   const [introVideoReady, setIntroVideoReady] = useState(false);
+  const [welcomeReady, setWelcomeReady] = useState(() => introPhase !== "welcome");
   const [stormEnabled, setStormEnabled] = useState(() => introPhase !== "welcome");
   const [coreLaunching, setCoreLaunching] = useState(false);
   const finishIntro = useCallback(() => {
@@ -292,6 +323,7 @@ export default function Hero() {
   }, []);
   const introActive = introPhase !== "done";
   const heroVisible = introPhase === "clouds" || introPhase === "done";
+  const markWelcomeReady = useCallback(() => setWelcomeReady(true), []);
   const startTrainVideo = () => {
     setIntroPhase((phase) => (phase === "welcome" ? "video" : phase));
   };
@@ -338,10 +370,10 @@ export default function Hero() {
   }, []);
 
   useEffect(() => {
-    if (introPhase !== "welcome") return;
+    if (introPhase !== "welcome" || !welcomeReady) return;
     const timer = window.setTimeout(startTrainVideo, PRE_INTRO_MS);
     return () => window.clearTimeout(timer);
-  }, [introPhase]);
+  }, [introPhase, welcomeReady]);
 
   useEffect(() => {
     if (introPhase !== "clouds") return;
@@ -483,6 +515,7 @@ export default function Hero() {
             <WelcomeIntro
               reduceMotion={reduceMotion}
               onContinue={startTrainVideo}
+              onReady={markWelcomeReady}
             />
           ) : null}
           </AnimatePresence>

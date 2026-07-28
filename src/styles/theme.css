@@ -200,6 +200,7 @@ a {
   font-family: "HelveticaNowDisplay-Medium", "Helvetica Neue", Arial, sans-serif;
 }
 
+.preintro-source-poster,
 .preintro-source-video {
   position: absolute;
   inset: 0;
@@ -209,6 +210,18 @@ a {
   object-fit: cover;
   object-position: 70% center;
   background: #a8a9a7;
+}
+
+.preintro-source-poster {
+  opacity: 1;
+}
+
+.preintro-source-video {
+  opacity: 0;
+}
+
+.preintro-source-video.is-ready {
+  opacity: 1;
 }
 
 @media (max-width: 767px) {
