@@ -31,7 +31,8 @@ const INTRO_MAX_MS = 12000;
 const CLOUD_TRANSITION_MS = 1450;
 const STORM_PREPARE_MS = 3800;
 const welcomeText = "Harshit Sharma builds deployable cloud, AI, and backend systems.";
-const MAINFRAME_VIDEO_SRC = "/media/intro-mainframe-breathe.mp4";
+const MAINFRAME_VIDEO_SRC = "/media/intro-mainframe-breathe-v2.mp4";
+const TRAIN_VIDEO_SRC = "/media/intro-hero-train-v2.mp4";
 
 function isReloadNavigation() {
   const [navigationEntry] = window.performance.getEntriesByType("navigation") as PerformanceNavigationTiming[];
@@ -478,7 +479,7 @@ export default function Hero() {
             <video
               ref={introVideoRef}
               className="h-full w-full bg-[#0C0C0C] object-cover object-center"
-              src="/media/intro-hero-20260703.mp4"
+              src={TRAIN_VIDEO_SRC}
               muted
               playsInline
               preload="auto"

@@ -353,7 +353,9 @@ export default function StormCore({
     scene.add(storm);
 
     let frame = 0;
-    let visible = true;
+    let inViewport = true;
+    let pageVisible = !document.hidden;
+    let windowFocused = true;
     let previousTime = 0;
     const startTime = performance.now();
     const frameInterval = 1000 / (isMobile ? 24 : 30);
@@ -422,7 +424,7 @@ export default function StormCore({
     };
 
     const animate = (time: number) => {
-      if (!visible) return;
+      if (!inViewport || !pageVisible || !windowFocused) return;
       if (activeRef.current && time - previousTime >= frameInterval) {
         previousTime = time;
         draw();
@@ -430,22 +432,47 @@ export default function StormCore({
       frame = window.requestAnimationFrame(animate);
     };
 
+    const scheduleAnimation = () => {
+      window.cancelAnimationFrame(frame);
+      if (inViewport && pageVisible && windowFocused && !reduceMotion) {
+        frame = window.requestAnimationFrame(animate);
+      }
+    };
+
     resize();
     draw();
     const resizeObserver = new ResizeObserver(resize);
     resizeObserver.observe(container);
     const visibilityObserver = new IntersectionObserver(([entry]) => {
-      visible = entry.isIntersecting;
-      window.cancelAnimationFrame(frame);
-      if (visible && !reduceMotion) frame = window.requestAnimationFrame(animate);
+      inViewport = entry.isIntersecting;
+      scheduleAnimation();
     });
+    const handleVisibilityChange = () => {
+      pageVisible = !document.hidden;
+      scheduleAnimation();
+    };
+    const handleWindowFocus = () => {
+      windowFocused = true;
+      scheduleAnimation();
+    };
+    const handleWindowBlur = () => {
+      windowFocused = false;
+      scheduleAnimation();
+    };
+
     visibilityObserver.observe(container);
-    if (!reduceMotion) frame = window.requestAnimationFrame(animate);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("focus", handleWindowFocus);
+    window.addEventListener("blur", handleWindowBlur);
+    scheduleAnimation();
 
     return () => {
       window.cancelAnimationFrame(frame);
       resizeObserver.disconnect();
       visibilityObserver.disconnect();
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("focus", handleWindowFocus);
+      window.removeEventListener("blur", handleWindowBlur);
       geometry.dispose();
       orbitGeometryA.dispose();
       orbitGeometryB.dispose();
