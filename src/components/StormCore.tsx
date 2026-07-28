@@ -20,6 +20,7 @@ type StormCoreProps = {
   scrollY: MotionValue<number>;
   scrollScale: MotionValue<number>;
   scrollOpacity: MotionValue<number>;
+  active?: boolean;
   reveal?: boolean;
   launching?: boolean;
   sceneProgress?: MotionValue<number>;
@@ -258,6 +259,7 @@ export default function StormCore({
   scrollY,
   scrollScale,
   scrollOpacity,
+  active = true,
   reveal = true,
   launching = false,
   sceneProgress,
@@ -267,8 +269,10 @@ export default function StormCore({
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const pointerTarget = useRef({ x: 0, y: 0, active: 0 });
   const pointerCurrent = useRef({ x: 0, y: 0, active: 0 });
+  const activeRef = useRef(active);
   const revealStartedAt = useRef<number | null>(reveal ? performance.now() : null);
   const launchStartedAt = useRef<number | null>(launching ? performance.now() : null);
+  activeRef.current = active;
 
   useEffect(() => {
     if (reveal && revealStartedAt.current === null) {
@@ -419,7 +423,7 @@ export default function StormCore({
 
     const animate = (time: number) => {
       if (!visible) return;
-      if (time - previousTime >= frameInterval) {
+      if (activeRef.current && time - previousTime >= frameInterval) {
         previousTime = time;
         draw();
       }

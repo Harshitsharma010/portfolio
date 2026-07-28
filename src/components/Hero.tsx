@@ -29,6 +29,7 @@ const introGreetings = ["Hello", "Namaste", "Bonjour"];
 const PRE_INTRO_MS = 5400;
 const INTRO_MAX_MS = 5600;
 const CLOUD_TRANSITION_MS = 1450;
+const STORM_PREPARE_MS = 3800;
 const welcomeText = "Harshit Sharma builds deployable cloud, AI, and backend systems.";
 const MAINFRAME_VIDEO_SRC =
   "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260530_042513_df96a13b-6155-4f6e-8b93-c9dee66fba08.mp4";
@@ -292,10 +293,10 @@ export default function Hero() {
   const introActive = introPhase !== "done";
   const heroVisible = introPhase === "clouds" || introPhase === "done";
   const startTrainVideo = () => {
-    setStormEnabled(true);
     setIntroPhase((phase) => (phase === "welcome" ? "video" : phase));
   };
   const startIntroTransition = () => {
+    setStormEnabled(true);
     setIntroPhase((phase) => (phase === "video" ? "clouds" : phase));
   };
   const handleCoreClick = useCallback((event: ReactMouseEvent<HTMLAnchorElement>) => {
@@ -323,22 +324,23 @@ export default function Hero() {
   }, [reduceMotion, finishIntro]);
 
   useEffect(() => {
+    let cancelled = false;
     const timer = window.setTimeout(() => {
-      void loadStormCore();
-    }, 120);
-    return () => window.clearTimeout(timer);
+      void loadStormCore().then(() => {
+        if (!cancelled) setStormEnabled(true);
+      });
+    }, STORM_PREPARE_MS);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
   }, []);
 
   useEffect(() => {
     if (introPhase !== "welcome") return;
     const timer = window.setTimeout(startTrainVideo, PRE_INTRO_MS);
     return () => window.clearTimeout(timer);
-  }, [introPhase]);
-
-  useEffect(() => {
-    if (introPhase !== "welcome") {
-      setStormEnabled(true);
-    }
   }, [introPhase]);
 
   useEffect(() => {
@@ -358,7 +360,7 @@ export default function Hero() {
     if (introPhase !== "video") return;
     const video = introVideoRef.current;
     if (!video) return;
-    const maxIntroTimer = window.setTimeout(startIntroTransition, INTRO_MAX_MS);
+    let maxIntroTimer = 0;
 
     const startIntro = () => {
       try {
@@ -370,7 +372,10 @@ export default function Hero() {
 
       void video
         .play()
-        .then(() => setIntroVideoReady(true))
+        .then(() => {
+          setIntroVideoReady(true);
+          maxIntroTimer = window.setTimeout(startIntroTransition, INTRO_MAX_MS);
+        })
         .catch(() => {
           startIntroTransition();
         });
@@ -590,6 +595,7 @@ export default function Hero() {
                 scrollScale={galaxyScale}
                 scrollOpacity={galaxyOpacity}
                 reveal={introPhase !== "welcome"}
+                active={introPhase === "clouds" || introPhase === "done"}
                 launching={coreLaunching}
               />
             </Suspense>
