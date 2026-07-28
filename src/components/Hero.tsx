@@ -31,11 +31,7 @@ const INTRO_MAX_MS = 5600;
 const CLOUD_TRANSITION_MS = 1450;
 const STORM_PREPARE_MS = 3800;
 const welcomeText = "Harshit Sharma builds deployable cloud, AI, and backend systems.";
-const MAINFRAME_VIDEO_SRC = "/media/intro-mainframe-loop.mp4";
-
-function clamp(value: number, min: number, max: number) {
-  return Math.min(Math.max(value, min), max);
-}
+const MAINFRAME_VIDEO_SRC = "/media/intro-mainframe-breathe.mp4";
 
 function isReloadNavigation() {
   const [navigationEntry] = window.performance.getEntriesByType("navigation") as PerformanceNavigationTiming[];
@@ -76,9 +72,6 @@ function WelcomeIntro({
   const [copied, setCopied] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const readyReported = useRef(false);
-  const previousX = useRef<number | null>(null);
-  const targetTime = useRef(0);
-  const seeking = useRef(false);
 
   const reportReady = useCallback(() => {
     if (readyReported.current) return;
@@ -126,41 +119,6 @@ function WelcomeIntro({
     return () => window.clearTimeout(timer);
   }, [reportReady]);
 
-  useEffect(() => {
-    if (reduceMotion) return;
-    const sensitivity = 0.8;
-
-    const requestSeek = () => {
-      const video = videoRef.current;
-      if (!video || !Number.isFinite(video.duration) || video.duration <= 0 || seeking.current) return;
-      seeking.current = true;
-      video.currentTime = clamp(targetTime.current, 0, video.duration);
-    };
-
-    const handleMove = (event: MouseEvent) => {
-      const video = videoRef.current;
-      if (!video || !Number.isFinite(video.duration) || video.duration <= 0) {
-        previousX.current = event.clientX;
-        return;
-      }
-
-      if (previousX.current === null) {
-        previousX.current = event.clientX;
-        targetTime.current = video.currentTime;
-        return;
-      }
-
-      const delta = event.clientX - previousX.current;
-      previousX.current = event.clientX;
-      const offset = (delta / window.innerWidth) * sensitivity * video.duration;
-      targetTime.current = clamp(targetTime.current + offset, 0, video.duration);
-      requestSeek();
-    };
-
-    window.addEventListener("mousemove", handleMove);
-    return () => window.removeEventListener("mousemove", handleMove);
-  }, [reduceMotion]);
-
   const copyEmail = async () => {
     try {
       await navigator.clipboard.writeText("harshitbhardwajhs@gmail.com");
@@ -171,26 +129,13 @@ function WelcomeIntro({
     }
   };
 
-  const handleLoadedMetadata = () => {
-    const video = videoRef.current;
-    if (video) targetTime.current = video.currentTime;
-  };
-
   const handleLoadedData = () => {
     setVideoFrameReady(true);
-  };
-
-  const handleSeeked = () => {
     const video = videoRef.current;
-    if (!video) {
-      seeking.current = false;
-      return;
-    }
-
-    seeking.current = false;
-    if (Math.abs(video.currentTime - targetTime.current) > 0.04) {
-      seeking.current = true;
-      video.currentTime = clamp(targetTime.current, 0, video.duration);
+    if (video && !reduceMotion && video.paused) {
+      void video.play().catch(() => {
+        // The poster remains visible if the browser blocks autoplay.
+      });
     }
   };
 
@@ -220,10 +165,8 @@ function WelcomeIntro({
         muted
         playsInline
         preload="auto"
-        onLoadedMetadata={handleLoadedMetadata}
         onLoadedData={handleLoadedData}
         onPlaying={handleLoadedData}
-        onSeeked={handleSeeked}
         aria-hidden="true"
       >
         <source src={MAINFRAME_VIDEO_SRC} type="video/mp4" />
