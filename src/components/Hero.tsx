@@ -31,8 +31,7 @@ const INTRO_MAX_MS = 5600;
 const CLOUD_TRANSITION_MS = 1450;
 const STORM_PREPARE_MS = 3800;
 const welcomeText = "Harshit Sharma builds deployable cloud, AI, and backend systems.";
-const MAINFRAME_VIDEO_SRC =
-  "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260530_042513_df96a13b-6155-4f6e-8b93-c9dee66fba08.mp4";
+const MAINFRAME_VIDEO_SRC = "/media/intro-mainframe-loop.mp4";
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
@@ -216,11 +215,14 @@ function WelcomeIntro({
       <video
         ref={videoRef}
         className={`preintro-source-video${videoFrameReady ? " is-ready" : ""}`}
+        autoPlay={!reduceMotion}
+        loop
         muted
         playsInline
-        preload="metadata"
+        preload="auto"
         onLoadedMetadata={handleLoadedMetadata}
         onLoadedData={handleLoadedData}
+        onPlaying={handleLoadedData}
         onSeeked={handleSeeked}
         aria-hidden="true"
       >
@@ -294,6 +296,7 @@ export default function Hero() {
   const heroRef = useRef<HTMLElement | null>(null);
   const heroSequenceRef = useRef<HTMLDivElement | null>(null);
   const coreLaunchTimers = useRef<number[]>([]);
+  const trainStartRequested = useRef(false);
   const reduceMotion = useReducedMotion();
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
   const galaxyY = useTransform(scrollYProgress, [0, 1], [0, -70]);
@@ -324,13 +327,36 @@ export default function Hero() {
   const introActive = introPhase !== "done";
   const heroVisible = introPhase === "clouds" || introPhase === "done";
   const markWelcomeReady = useCallback(() => setWelcomeReady(true), []);
-  const startTrainVideo = () => {
+  const startTrainVideo = useCallback(() => {
+    const video = introVideoRef.current;
+    if (video && video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) {
+      trainStartRequested.current = true;
+      video.load();
+      return;
+    }
+
+    trainStartRequested.current = false;
     setIntroPhase((phase) => (phase === "welcome" ? "video" : phase));
-  };
-  const startIntroTransition = () => {
+  }, []);
+  const startIntroTransition = useCallback(() => {
     setStormEnabled(true);
     setIntroPhase((phase) => (phase === "video" ? "clouds" : phase));
-  };
+  }, []);
+  const handleTrainPrepared = useCallback(() => {
+    if (!trainStartRequested.current) return;
+    trainStartRequested.current = false;
+    setIntroPhase((phase) => (phase === "welcome" ? "video" : phase));
+  }, []);
+  const handleTrainError = useCallback(() => {
+    if (trainStartRequested.current) {
+      trainStartRequested.current = false;
+      setStormEnabled(true);
+      setIntroPhase((phase) => (phase === "welcome" ? "clouds" : phase));
+      return;
+    }
+
+    startIntroTransition();
+  }, [startIntroTransition]);
   const handleCoreClick = useCallback((event: ReactMouseEvent<HTMLAnchorElement>) => {
     if (reduceMotion || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     event.preventDefault();
@@ -356,24 +382,19 @@ export default function Hero() {
   }, [reduceMotion, finishIntro]);
 
   useEffect(() => {
-    let cancelled = false;
+    if (introPhase !== "welcome") return;
     const timer = window.setTimeout(() => {
-      void loadStormCore().then(() => {
-        if (!cancelled) setStormEnabled(true);
-      });
+      void loadStormCore();
     }, STORM_PREPARE_MS);
 
-    return () => {
-      cancelled = true;
-      window.clearTimeout(timer);
-    };
-  }, []);
+    return () => window.clearTimeout(timer);
+  }, [introPhase]);
 
   useEffect(() => {
     if (introPhase !== "welcome" || !welcomeReady) return;
     const timer = window.setTimeout(startTrainVideo, PRE_INTRO_MS);
     return () => window.clearTimeout(timer);
-  }, [introPhase, welcomeReady]);
+  }, [introPhase, startTrainVideo, welcomeReady]);
 
   useEffect(() => {
     if (introPhase !== "clouds") return;
@@ -499,9 +520,10 @@ export default function Hero() {
               muted
               playsInline
               preload="auto"
+              onLoadedData={handleTrainPrepared}
               onPlaying={() => setIntroVideoReady(true)}
               onEnded={startIntroTransition}
-              onError={startIntroTransition}
+              onError={handleTrainError}
             />
             <div className="absolute inset-0 bg-black/25" />
             <div className="intro-vignette absolute inset-0" />

@@ -52,7 +52,14 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
         aria-label={`Open ${project.title}${project.liveHref ? " live project" : " repository"}`}
         className={`project-cover relative block overflow-hidden ${isFeatured ? "min-h-[29rem] sm:min-h-[34rem]" : "min-h-[25rem] sm:min-h-[29rem]"}`}
       >
-        <img src={visual.image} alt={visual.alt} className="project-cover-image absolute inset-0 h-full w-full object-cover" />
+        <img
+          src={visual.image}
+          alt={visual.alt}
+          loading="lazy"
+          decoding="async"
+          fetchPriority="low"
+          className="project-cover-image absolute inset-0 h-full w-full object-cover"
+        />
         <div className="project-cover-veil absolute inset-0" aria-hidden="true" />
         <div className="project-cover-noise pointer-events-none absolute inset-0" aria-hidden="true" />
 

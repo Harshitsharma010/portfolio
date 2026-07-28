@@ -218,6 +218,7 @@ a {
 
 .preintro-source-video {
   opacity: 0;
+  transition: opacity 0.22s ease-out;
 }
 
 .preintro-source-video.is-ready {
