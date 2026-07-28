@@ -3,9 +3,9 @@ import {
   Suspense,
   useCallback,
   useEffect,
-  useLayoutEffect,
   useRef,
   useState,
+  type MouseEvent as ReactMouseEvent,
 } from "react";
 import {
   AnimatePresence,
@@ -16,7 +16,14 @@ import {
 } from "framer-motion";
 import RoleRotator from "./RoleRotator";
 
-const StormCore = lazy(() => import("./StormCore"));
+let stormCoreModule: Promise<typeof import("./StormCore")> | null = null;
+
+function loadStormCore() {
+  stormCoreModule ??= import("./StormCore");
+  return stormCoreModule;
+}
+
+const StormCore = lazy(loadStormCore);
 
 const introGreetings = ["Hello", "Namaste", "Bonjour"];
 const PRE_INTRO_MS = 5400;
@@ -25,12 +32,6 @@ const CLOUD_TRANSITION_MS = 1450;
 const welcomeText = "Harshit Sharma builds deployable cloud, AI, and backend systems.";
 const MAINFRAME_VIDEO_SRC =
   "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260530_042513_df96a13b-6155-4f6e-8b93-c9dee66fba08.mp4";
-let gsapModule: Promise<typeof import("gsap")> | null = null;
-
-function loadGsap() {
-  gsapModule ??= import("gsap");
-  return gsapModule;
-}
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
@@ -261,6 +262,7 @@ export default function Hero() {
   const introVideoRef = useRef<HTMLVideoElement | null>(null);
   const heroRef = useRef<HTMLElement | null>(null);
   const heroSequenceRef = useRef<HTMLDivElement | null>(null);
+  const coreLaunchTimers = useRef<number[]>([]);
   const reduceMotion = useReducedMotion();
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
   const galaxyY = useTransform(scrollYProgress, [0, 1], [0, -70]);
@@ -282,22 +284,50 @@ export default function Hero() {
   );
   const [introVideoReady, setIntroVideoReady] = useState(false);
   const [stormEnabled, setStormEnabled] = useState(() => introPhase !== "welcome");
+  const [coreLaunching, setCoreLaunching] = useState(false);
   const finishIntro = useCallback(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
     setIntroPhase("done");
   }, []);
   const introActive = introPhase !== "done";
+  const heroVisible = introPhase === "clouds" || introPhase === "done";
   const startTrainVideo = () => {
+    setStormEnabled(true);
     setIntroPhase((phase) => (phase === "welcome" ? "video" : phase));
   };
   const startIntroTransition = () => {
     setIntroPhase((phase) => (phase === "video" ? "clouds" : phase));
   };
+  const handleCoreClick = useCallback((event: ReactMouseEvent<HTMLAnchorElement>) => {
+    if (reduceMotion || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    if (coreLaunching) return;
+
+    setCoreLaunching(true);
+    const navigateTimer = window.setTimeout(() => {
+      window.history.pushState(null, "", "#proof");
+      document.getElementById("proof")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 340);
+    const resetTimer = window.setTimeout(() => setCoreLaunching(false), 1450);
+    coreLaunchTimers.current.push(navigateTimer, resetTimer);
+  }, [coreLaunching, reduceMotion]);
+
+  useEffect(() => () => {
+    coreLaunchTimers.current.forEach((timer) => window.clearTimeout(timer));
+  }, []);
+
   useEffect(() => {
     if (reduceMotion) {
       finishIntro();
     }
   }, [reduceMotion, finishIntro]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      void loadStormCore();
+    }, 120);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     if (introPhase !== "welcome") return;
@@ -308,48 +338,8 @@ export default function Hero() {
   useEffect(() => {
     if (introPhase !== "welcome") {
       setStormEnabled(true);
-      if (!reduceMotion) void loadGsap();
     }
-  }, [introPhase, reduceMotion]);
-
-  useLayoutEffect(() => {
-    if (introPhase !== "done" || !heroSequenceRef.current || reduceMotion) return;
-
-    let cancelled = false;
-    let context: { revert: () => void } | undefined;
-
-    void loadGsap().then(({ gsap }) => {
-      if (cancelled || !heroSequenceRef.current) return;
-      context = gsap.context(() => {
-        const timeline = gsap.timeline({ defaults: { ease: "power4.out" } });
-        timeline
-          .from("[data-hero-copy]", {
-            x: -34,
-            autoAlpha: 0,
-            filter: "blur(9px)",
-            duration: 0.78,
-            stagger: 0.1,
-            clearProps: "transform,opacity,visibility,filter",
-          })
-          .from(
-            "[data-hero-core]",
-            {
-              scale: 0.9,
-              autoAlpha: 0,
-              filter: "blur(14px)",
-              duration: 1.05,
-              clearProps: "transform,opacity,visibility,filter",
-            },
-            0.08,
-          );
-      }, heroSequenceRef);
-    });
-
-    return () => {
-      cancelled = true;
-      context?.revert();
-    };
-  }, [introPhase, reduceMotion]);
+  }, [introPhase]);
 
   useEffect(() => {
     if (introPhase !== "clouds") return;
@@ -525,22 +515,37 @@ export default function Hero() {
         className="relative z-20 mx-auto grid min-h-[100dvh] w-full max-w-[1500px] items-center gap-10 px-5 pb-16 pt-28 sm:px-8 md:px-10 lg:grid-cols-[1fr_0.95fr] lg:gap-10 lg:pt-24"
       >
         <div className="max-w-2xl">
-          <div data-hero-copy>
+          <motion.div
+            data-hero-copy
+            initial={false}
+            animate={{ opacity: heroVisible ? 1 : 0, x: heroVisible ? 0 : -28 }}
+            transition={{ duration: reduceMotion ? 0 : 0.62, delay: heroVisible ? 0.12 : 0, ease: [0.16, 1, 0.3, 1] }}
+          >
             <h1 className="hero-heading max-w-[9.2ch] text-[clamp(3rem,7vw,6rem)] font-black uppercase leading-[0.86] tracking-[-0.024em] text-balance">
               Cloud, DevOps &amp; AI Engineer
             </h1>
-          </div>
+          </motion.div>
 
-          <div data-hero-copy>
+          <motion.div
+            data-hero-copy
+            initial={false}
+            animate={{ opacity: heroVisible ? 1 : 0, x: heroVisible ? 0 : -28 }}
+            transition={{ duration: reduceMotion ? 0 : 0.62, delay: heroVisible ? 0.16 : 0, ease: [0.16, 1, 0.3, 1] }}
+          >
             <p className="mt-7 text-[clamp(1.2rem,2.5vw,2rem)] font-medium uppercase tracking-[0.08em] text-[#D7E2EA]">
               <RoleRotator />
             </p>
             <p className="mt-5 max-w-xl text-base font-light leading-7 text-[#D7E2EA]/[0.72] sm:text-lg">
               I build deployable AWS systems and AI-backed products, from Terraform and CI/CD to monitored APIs and reviewer-ready proof.
             </p>
-          </div>
+          </motion.div>
 
-          <div data-hero-copy>
+          <motion.div
+            data-hero-copy
+            initial={false}
+            animate={{ opacity: heroVisible ? 1 : 0, x: heroVisible ? 0 : -28 }}
+            transition={{ duration: reduceMotion ? 0 : 0.62, delay: heroVisible ? 0.2 : 0, ease: [0.16, 1, 0.3, 1] }}
+          >
             <div className="mt-9 flex flex-wrap gap-3">
               <motion.a
                 href="#projects"
@@ -562,11 +567,21 @@ export default function Hero() {
             <p className="mt-6 text-sm font-light tracking-[0.04em] text-[#D7E2EA]/55">
               AWS infrastructure / Terraform / Docker / FastAPI / applied ML
             </p>
-          </div>
+          </motion.div>
 
         </div>
 
-        <div data-hero-core className="relative flex justify-center lg:justify-end">
+        <motion.a
+          href="#proof"
+          data-hero-core
+          className="relative flex cursor-pointer justify-center lg:justify-end"
+          aria-label="Open the architecture proof chart"
+          title="Open architecture proof"
+          onClick={handleCoreClick}
+          initial={false}
+          animate={{ opacity: heroVisible ? 1 : 0, scale: heroVisible ? 1 : 0.94 }}
+          transition={{ duration: reduceMotion ? 0 : 0.72, delay: heroVisible ? 0.12 : 0, ease: [0.16, 1, 0.3, 1] }}
+        >
           {stormEnabled ? (
             <Suspense fallback={<div className="aspect-square w-[min(88vw,560px)]" aria-hidden="true" />}>
               <StormCore
@@ -574,12 +589,14 @@ export default function Hero() {
                 scrollY={galaxyY}
                 scrollScale={galaxyScale}
                 scrollOpacity={galaxyOpacity}
+                reveal={introPhase !== "welcome"}
+                launching={coreLaunching}
               />
             </Suspense>
           ) : (
             <div className="aspect-square w-[min(88vw,560px)]" aria-hidden="true" />
           )}
-        </div>
+        </motion.a>
       </div>
     </section>
   );
