@@ -52,7 +52,7 @@ export default function SkillsSection() {
   return (
     <section
       id="skills"
-      className="relative z-40 scroll-mt-24 overflow-hidden bg-[#0C0C0C] px-5 py-28 text-white sm:px-8 sm:py-32 md:px-10 md:py-36"
+      className="relative z-20 scroll-mt-24 overflow-hidden bg-[#0C0C0C] px-5 py-28 text-white sm:px-8 sm:py-32 md:px-10 md:py-36"
     >
       <div className="film-grain pointer-events-none absolute inset-0 opacity-30" aria-hidden="true" />
       <div

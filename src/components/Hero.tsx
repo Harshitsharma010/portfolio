@@ -27,7 +27,7 @@ const StormCore = lazy(loadStormCore);
 
 const introGreetings = ["Hello", "Namaste", "Bonjour"];
 const PRE_INTRO_MS = 5400;
-const INTRO_MAX_MS = 5600;
+const INTRO_MAX_MS = 12000;
 const CLOUD_TRANSITION_MS = 1450;
 const STORM_PREPARE_MS = 3800;
 const welcomeText = "Harshit Sharma builds deployable cloud, AI, and backend systems.";
@@ -326,12 +326,31 @@ export default function Hero() {
 
   useEffect(() => {
     if (introPhase !== "welcome") return;
+    let cancelled = false;
     const timer = window.setTimeout(() => {
-      void loadStormCore();
+      void loadStormCore().then(() => {
+        if (!cancelled) setStormEnabled(true);
+      });
     }, STORM_PREPARE_MS);
 
-    return () => window.clearTimeout(timer);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
   }, [introPhase]);
+
+  useEffect(() => {
+    if (introPhase !== "video" || stormEnabled) return;
+    let cancelled = false;
+
+    void loadStormCore().then(() => {
+      if (!cancelled) setStormEnabled(true);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [introPhase, stormEnabled]);
 
   useEffect(() => {
     if (introPhase !== "welcome" || !welcomeReady) return;
@@ -497,14 +516,6 @@ export default function Hero() {
               scale: introPhase === "clouds" ? [0.9, 1.04, 1.22] : 0.9,
             }}
             transition={{ duration: 1.45, times: [0, 0.58, 1], ease: [0.16, 1, 0.3, 1] }}
-          />
-          <motion.div
-            className="intro-aperture pointer-events-none absolute inset-0"
-            animate={{
-              opacity: introPhase === "clouds" ? [0, 0.72, 0] : 0,
-              clipPath: introPhase === "clouds" ? ["circle(0% at 50% 50%)", "circle(48% at 50% 50%)", "circle(120% at 50% 50%)"] : "circle(0% at 50% 50%)",
-            }}
-            transition={{ duration: 1.35, times: [0, 0.46, 1], ease: [0.16, 1, 0.3, 1] }}
           />
         </motion.div>
       ) : null}
