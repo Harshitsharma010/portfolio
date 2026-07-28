@@ -38,6 +38,67 @@ body {
   background: #0c0c0c;
 }
 
+.starfield-page {
+  isolation: isolate;
+  background: #030409;
+}
+
+.starfield-page > section {
+  background-color: rgba(7, 7, 10, 0.28) !important;
+}
+
+.starfield-backdrop {
+  z-index: 0;
+  overflow: hidden;
+  background: #030409;
+}
+
+.starfield-photo {
+  inset: -12vh -8vw;
+  background-image: url("/media/celestial-night-backdrop.webp");
+  background-position: center;
+  background-size: cover;
+  filter: brightness(1.28) contrast(1.04) saturate(0.78);
+  opacity: 1;
+  transform: scale(1.08);
+  will-change: transform;
+}
+
+.starfield-haze {
+  background:
+    linear-gradient(118deg, transparent 16%, rgba(219, 184, 124, 0.06) 39%, rgba(185, 73, 127, 0.07) 52%, transparent 72%),
+    linear-gradient(180deg, rgba(4, 5, 10, 0.06), rgba(4, 5, 10, 0.38));
+  filter: blur(28px);
+  opacity: 0.78;
+  transform: scale(1.08);
+  will-change: transform;
+}
+
+.starfield-veil {
+  background:
+    linear-gradient(90deg, rgba(2, 3, 7, 0.72) 0%, rgba(2, 3, 7, 0.1) 44%, rgba(2, 3, 7, 0.04) 100%),
+    linear-gradient(180deg, rgba(3, 4, 9, 0.04) 0%, transparent 38%, rgba(3, 4, 9, 0.22) 100%);
+}
+
+@media (max-width: 767px) {
+  .starfield-page > section {
+    background-color: rgba(7, 7, 10, 0.5) !important;
+  }
+
+  .starfield-photo {
+    inset: -8vh -46vw;
+    background-position: 57% center;
+    filter: brightness(1.05) contrast(1.06) saturate(0.68);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .starfield-photo,
+  .starfield-haze {
+    will-change: auto;
+  }
+}
+
 #root {
   min-height: 100dvh;
   background: #0c0c0c;

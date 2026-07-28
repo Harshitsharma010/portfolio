@@ -1,6 +1,7 @@
 import { lazy, Suspense, useLayoutEffect } from "react";
 import Navbar from "./components/Navbar";
 import ScrollProgress from "./components/ScrollProgress";
+import StarfieldBackdrop from "./components/StarfieldBackdrop";
 import Hero from "./components/Hero";
 import AboutSection from "./components/AboutSection";
 import RecruiterSnapshot from "./components/RecruiterSnapshot";
@@ -56,7 +57,8 @@ function App() {
   }
 
   return (
-    <main className="bg-[#0C0C0C] font-body text-[#D7E2EA]">
+    <main className="starfield-page bg-[#0C0C0C] font-body text-[#D7E2EA]">
+      <StarfieldBackdrop />
       <ScrollProgress />
       <Navbar />
       <Hero />
