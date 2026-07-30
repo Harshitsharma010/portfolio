@@ -1,210 +1,229 @@
-import { Binary, CloudCog, Code2, ExternalLink, MonitorUp, ShieldCheck, Waypoints } from "lucide-react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
-  AnimatePresence,
-  motion,
-  useMotionValueEvent,
-  useReducedMotion,
-  useScroll,
-  useSpring,
-  useTransform,
-} from "framer-motion";
-import { useRef, useState } from "react";
+  Activity,
+  ArrowRight,
+  ArrowUpRight,
+  CloudCog,
+  Code2,
+  ExternalLink,
+  Radar,
+} from "lucide-react";
+import { useState } from "react";
 import FadeIn from "./FadeIn";
 import ParticleField from "./ParticleField";
 
-const trustnetSteps = [
+const trustnetVisuals = [
   {
-    number: "01",
-    shortLabel: "Browser",
-    label: "Browser signal",
-    title: "A suspicious link enters the workflow.",
-    detail: "The locally installed Manifest V3 extension shows a risk signal where users encounter suspicious URLs.",
-    proof: "Local Chrome extension",
+    id: "console",
+    label: "Live console",
+    icon: Radar,
+    image: "/media/projects/trustnet-dashboard-live.png",
+    alt: "TrustNet CyberCop dashboard showing an 87 percent dangerous URL result",
+    title: "A working URL intelligence console.",
+    detail: "Paste a URL, run the deployed analysis path, and inspect the model verdict in one product surface.",
+    proof: "Live AWS API / 87% risk result",
+    href: "https://main.dqqhdlk8jbmoh.amplifyapp.com",
   },
   {
-    number: "02",
-    shortLabel: "Features",
-    label: "Feature extraction",
-    title: "The system extracts URL features.",
-    detail: "TrustNet extracts URL-level signals such as length, subdomain count, TLD, HTTPS presence, and suspicious keywords.",
-    proof: "Python + scikit-learn",
+    id: "signals",
+    label: "ML signals",
+    icon: Activity,
+    image: "/media/projects/trustnet-signals-live.png",
+    alt: "TrustNet signal graph and explainable phishing risk evidence",
+    title: "The verdict stays inspectable.",
+    detail: "Risk score, confidence, feature count, signal weights, and plain-English reasons expose what drove the result.",
+    proof: "47 URL features / explainable reasons",
+    href: "https://main.dqqhdlk8jbmoh.amplifyapp.com",
   },
   {
-    number: "03",
-    shortLabel: "API",
-    label: "Model inference",
-    title: "The API returns a risk prediction.",
-    detail: "Backend APIs serve model predictions to the extension and React dashboard.",
-    proof: "Backend API contract",
-  },
-  {
-    number: "04",
-    shortLabel: "AWS",
-    label: "Deployment evidence",
-    title: "The repository documents the AWS path.",
-    detail: "AWS deployment notes cover Lambda containers, API Gateway, ECR, Amplify, CloudWatch logging, and security considerations.",
-    proof: "Deployment notes",
+    id: "deployment",
+    label: "AWS proof",
+    icon: CloudCog,
+    image: "/media/projects/trustnet-deployment-live.png",
+    alt: "TrustNet architecture strip, recent scans, and AWS deployment proof",
+    title: "Deployment evidence is part of the product.",
+    detail: "The live surface exposes its AWS path, model signals, observability checks, and recent scan behavior.",
+    proof: "Lambda / API Gateway / ECR / CloudWatch",
+    href: "https://github.com/Harshitsharma010/trustnet-cybercop",
   },
 ];
 
-const verificationRows = [
-  { label: "Dashboard", value: "Hosted on AWS Amplify" },
-  { label: "Extension", value: "Runs locally / Manifest V3" },
-  { label: "Deployment record", value: "Lambda / API Gateway / ECR / CloudWatch" },
-];
-
-const architectureIcons = [MonitorUp, Binary, Waypoints, CloudCog];
-
-function StageContent({ step }: { step: (typeof trustnetSteps)[number] }) {
-  return (
-    <>
-      <div className="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.2em] text-white/50">
-        <span className="text-white">{step.number}</span>
-        <span className="h-px w-12 bg-[#D9B86F]" />
-        <span>{step.label}</span>
-      </div>
-      <h3 className="mt-5 max-w-2xl text-[clamp(2rem,4.5vw,4.4rem)] font-black uppercase leading-[0.88] tracking-[-0.04em] text-white">
-        {step.title}
-      </h3>
-      <p className="mt-4 max-w-xl text-base font-light leading-7 text-white/[0.68] sm:text-lg">
-        {step.detail}
-      </p>
-      <p className="mt-5 text-xs font-semibold uppercase tracking-[0.18em] text-white/50">Proof: {step.proof}</p>
-    </>
-  );
-}
-
-function StaticStages({ expanded = false }: { expanded?: boolean }) {
-  return (
-    <div className={expanded ? "grid gap-x-10 gap-y-12 lg:grid-cols-2" : "space-y-9 lg:hidden"}>
-      {trustnetSteps.map((step) => (
-        <article key={step.number} className="border-t border-white/15 pt-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/50">{step.number} / {step.label}</p>
-          <h3 className="mt-4 text-3xl font-black uppercase leading-[0.9] tracking-[-0.035em]">{step.title}</h3>
-          <p className="mt-4 text-sm font-light leading-6 text-white/[0.68]">{step.detail}</p>
-          <p className="mt-4 text-xs font-semibold uppercase tracking-[0.15em] text-white/50">Proof: {step.proof}</p>
-        </article>
-      ))}
-    </div>
-  );
-}
+const architecture = ["React Dashboard", "API Gateway", "Lambda Container", "ML Model", "CloudWatch Logs"];
 
 export default function ProofSection() {
-  const sectionRef = useRef<HTMLElement | null>(null);
   const reduceMotion = useReducedMotion();
-  const [activeStage, setActiveStage] = useState(0);
-  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start start", "end end"] });
-  const progress = useSpring(scrollYProgress, { stiffness: 110, damping: 28, restDelta: 0.001 });
-  const progressScale = useTransform(progress, [0, 1], [0, 1]);
-
-  useMotionValueEvent(progress, "change", (latest) => {
-    if (reduceMotion) return;
-    const nextStage = Math.max(
-      0,
-      Math.min(trustnetSteps.length - 1, Math.floor(latest * trustnetSteps.length)),
-    );
-    setActiveStage((current) => (current === nextStage ? current : nextStage));
-  });
-
-  const staticLayout = Boolean(reduceMotion);
+  const [activeVisual, setActiveVisual] = useState(0);
+  const active = trustnetVisuals[activeVisual];
 
   return (
-    <section
-      ref={sectionRef}
-      id="proof"
-      className={`relative z-20 overflow-x-clip bg-[#100A13] text-[#F4F0F3] ${staticLayout ? "" : "lg:min-h-[220vh]"}`}
-    >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(184,78,142,0.16),transparent_34%),radial-gradient(circle_at_82%_72%,rgba(217,184,111,0.12),transparent_36%),linear-gradient(180deg,#100A13_0%,#09070B_100%)]" />
-      <ParticleField variant="proof" className="particle-mask-proof absolute inset-0 z-[1] opacity-55" />
+    <section id="proof" className="relative z-20 overflow-hidden bg-[#0D0910] px-5 py-20 text-[#F4F0F3] sm:px-8 sm:py-24 md:px-10 md:py-28">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_82%_18%,rgba(68,209,197,0.09),transparent_32%),radial-gradient(circle_at_14%_72%,rgba(183,73,116,0.11),transparent_34%),linear-gradient(180deg,#0D0910_0%,#08090B_100%)]" />
+      <ParticleField variant="proof" className="particle-mask-proof absolute inset-0 z-[1] opacity-35" />
 
-      <div className={`px-5 py-20 sm:px-8 sm:py-24 md:px-10 md:py-28 ${staticLayout ? "" : "lg:sticky lg:top-20 lg:h-[calc(100vh-5rem)] lg:min-h-0 lg:py-8"}`}>
-        <div className="relative z-10 mx-auto flex max-w-7xl flex-col justify-between lg:h-full lg:min-h-0">
-          <div className="grid gap-8 lg:grid-cols-[0.7fr_1.3fr] lg:items-end">
-            <FadeIn>
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/50">Strongest project / AWS + ML</p>
-              <h2 className="mt-5 text-[clamp(2.8rem,6.2vw,5rem)] font-black uppercase leading-[0.86] tracking-[-0.04em]">TrustNet<br />CyberCop.</h2>
-            </FadeIn>
-            <FadeIn delay={0.08}>
-              <p className="max-w-2xl text-base font-light leading-7 text-white/[0.68] sm:text-lg">
-                A phishing detection system with a live AWS dashboard, browser extension, model inference API, and documented deployment path.
-              </p>
-            </FadeIn>
+      <div className="relative z-10 mx-auto max-w-7xl">
+        <FadeIn>
+          <div className="flex items-center gap-3 text-[0.66rem] font-semibold uppercase tracking-[0.18em] text-[#8FE3DC]">
+            <span>01</span>
+            <span className="h-px w-10 bg-[#53C9BF]/70" aria-hidden="true" />
+            <span>Flagship security project</span>
           </div>
-
-          <div className="mt-12 grid gap-12 lg:mt-5 lg:grid-cols-[0.62fr_1.38fr] lg:items-start">
-            <div>
-              <div className="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.18em] text-white/50">
-                <ShieldCheck size={18} />
-                <span>Live proof</span>
-              </div>
-              <p className="mt-5 max-w-xs text-sm font-light leading-6 text-white/[0.64] lg:mt-3">
-                Use the live interface for the product flow and the repository for architecture and deployment details.
-              </p>
-              <div className="mt-7 flex flex-wrap gap-3 lg:mt-5">
-                <a href="https://main.dqqhdlk8jbmoh.amplifyapp.com" target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-2 rounded-full bg-white px-5 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-[#100A13] transition-transform hover:-translate-y-0.5">
-                  <ExternalLink size={15} /> Live dashboard
-                </a>
-                <a href="https://github.com/Harshitsharma010/trustnet-cybercop" target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-2 rounded-full border border-white/25 px-5 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-white transition-colors hover:bg-white/10">
-                  <Code2 size={15} /> Inspect repo
-                </a>
-              </div>
-              <dl className="mt-8 max-w-sm divide-y divide-white/10 border-y border-white/10 lg:mt-5">
-                {verificationRows.map((row) => (
-                  <div key={row.label} className="grid grid-cols-[0.78fr_1.22fr] gap-4 py-2.5 text-xs leading-5">
-                    <dt className="font-medium uppercase tracking-[0.12em] text-white/40">{row.label}</dt>
-                    <dd className="text-right font-light text-white/72">{row.value}</dd>
-                  </div>
-                ))}
-              </dl>
+          <h2 className="mt-5 max-w-4xl text-[clamp(3rem,5.8vw,4.6rem)] font-black uppercase leading-[0.88] tracking-[-0.035em] text-white">
+            TrustNet CyberCop.
+          </h2>
+          <div className="mt-6 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <p className="max-w-2xl text-base font-light leading-7 text-white/[0.68] sm:text-lg">
+              A live phishing intelligence product connecting URL analysis, explainable ML signals, and inspectable AWS deployment proof.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <a
+                href="https://main.dqqhdlk8jbmoh.amplifyapp.com"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex min-h-11 items-center gap-2 rounded-full bg-white px-5 py-3 text-xs font-semibold uppercase tracking-[0.13em] text-[#0D0910] transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8FE3DC]"
+              >
+                <ExternalLink size={15} aria-hidden="true" /> Live dashboard
+              </a>
+              <a
+                href="https://github.com/Harshitsharma010/trustnet-cybercop"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex min-h-11 items-center gap-2 rounded-full border border-white/20 px-5 py-3 text-xs font-semibold uppercase tracking-[0.13em] text-white transition-colors hover:border-white/40 hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8FE3DC]"
+              >
+                <Code2 size={15} aria-hidden="true" /> Inspect repo
+              </a>
             </div>
+          </div>
+        </FadeIn>
 
-            {!staticLayout ? (
-              <div className="hidden lg:block">
-                <div className="relative h-20" aria-hidden="true">
-                  <div className="absolute left-[12.5%] right-[12.5%] top-8 h-px bg-white/15" />
-                  <motion.div className="absolute left-[12.5%] right-[12.5%] top-8 h-px origin-left bg-[#D9B86F]" style={{ scaleX: progressScale }} />
-                  <div className="relative z-10 grid grid-cols-4 gap-2">
-                    {trustnetSteps.map((step, index) => {
-                      const Icon = architectureIcons[index];
-                      const active = index === activeStage;
-                      const complete = index <= activeStage;
-                      return (
-                        <motion.div
-                          key={step.number}
-                          className={`mx-auto flex w-full max-w-32 flex-col items-center gap-1.5 border px-2 py-2 backdrop-blur-md transition-colors ${active ? "border-[#D9B86F]/70 bg-[#D9B86F]/[0.12] text-white" : complete ? "border-white/20 bg-white/[0.055] text-white/70" : "border-white/10 bg-black/20 text-white/35"}`}
-                          animate={reduceMotion ? undefined : { y: active ? -4 : 0, scale: active ? 1.04 : 1 }}
-                          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                        >
-                          <Icon size={17} strokeWidth={1.6} />
-                          <span className="text-[0.56rem] font-semibold uppercase tracking-[0.12em]">{step.shortLabel}</span>
-                        </motion.div>
-                      );
-                    })}
-                  </div>
-                </div>
+        <div className="mt-12 sm:mt-16">
+          <div className="hide-scrollbar mb-5 flex gap-2 overflow-x-auto pb-1 sm:justify-end">
+            {trustnetVisuals.map((visual, index) => {
+              const Icon = visual.icon;
+              const selected = index === activeVisual;
 
-                <div className="relative mt-4 min-h-[250px] overflow-hidden">
-                  <AnimatePresence mode="wait" initial={false}>
-                    <motion.article
-                      key={trustnetSteps[activeStage].number}
-                      initial={{ opacity: 0, y: 22, filter: "blur(7px)" }}
-                      animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                      exit={{ opacity: 0, y: -16, filter: "blur(6px)" }}
-                      transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
-                    >
-                      <StageContent step={trustnetSteps[activeStage]} />
-                    </motion.article>
-                  </AnimatePresence>
-                </div>
-              </div>
-            ) : null}
-
-            {staticLayout ? <StaticStages expanded /> : <StaticStages />}
+              return (
+                <button
+                  key={visual.id}
+                  type="button"
+                  onClick={() => setActiveVisual(index)}
+                  aria-pressed={selected}
+                  className={`inline-flex min-h-10 shrink-0 items-center gap-2 rounded-md border px-4 py-2 text-[0.66rem] font-semibold uppercase tracking-[0.13em] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8FE3DC] ${
+                    selected
+                      ? "border-[#53C9BF]/55 bg-[#53C9BF]/[0.11] text-[#A7F0EA]"
+                      : "border-white/10 bg-white/[0.035] text-white/48 hover:border-white/22 hover:text-white/80"
+                  }`}
+                >
+                  <Icon size={15} strokeWidth={1.7} aria-hidden="true" />
+                  {visual.label}
+                </button>
+              );
+            })}
           </div>
 
-          <div className="mt-8 flex items-center justify-between border-t border-white/15 pt-4 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-white/45 lg:mt-3">
-            <span className="hidden lg:inline">{staticLayout ? "Architecture overview" : "Scroll to trace the system"}</span>
-            <span>TrustNet / 04 stages</span>
+          <div className="relative h-[430px] [perspective:1400px] sm:h-[540px] lg:h-[620px]">
+            {trustnetVisuals.map((visual, index) => {
+              const relativePosition = (index - activeVisual + trustnetVisuals.length) % trustnetVisuals.length;
+              const isActive = relativePosition === 0;
+              const isLeft = relativePosition === trustnetVisuals.length - 1;
+              const positionClass = isActive
+                ? "left-[2%] top-[2%] z-30 h-[82%] w-[96%] sm:left-[7%] sm:h-[88%] sm:w-[86%]"
+                : isLeft
+                  ? "left-0 top-[27%] z-10 h-[52%] w-[38%]"
+                  : "right-0 top-[27%] z-20 h-[52%] w-[38%]";
+
+              return (
+                <motion.a
+                  key={visual.id}
+                  href={visual.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={(event) => {
+                    if (!isActive) {
+                      event.preventDefault();
+                      setActiveVisual(index);
+                    }
+                  }}
+                  aria-label={isActive ? `Open ${visual.label}` : `Bring ${visual.label} forward`}
+                  className={`group absolute overflow-hidden rounded-lg border bg-[#070B0E] shadow-[0_30px_80px_rgba(0,0,0,0.48)] outline-none transition-[left,right,top,width,height,border-color,opacity,transform] duration-500 focus-visible:ring-2 focus-visible:ring-[#8FE3DC] ${positionClass} ${
+                    isActive
+                      ? "border-white/20 opacity-100"
+                      : "border-white/10 opacity-45 hover:border-[#53C9BF]/35 hover:opacity-75"
+                  }`}
+                  animate={reduceMotion ? undefined : {
+                    rotateY: isActive ? 0 : isLeft ? 8 : -8,
+                    rotateZ: isActive ? 0 : isLeft ? -2.4 : 2.4,
+                    y: isActive ? 0 : 10,
+                    scale: isActive ? 1 : 0.96,
+                  }}
+                  whileHover={reduceMotion ? undefined : { y: isActive ? -3 : 3, scale: isActive ? 1.005 : 0.985 }}
+                  transition={{ duration: 0.52, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  <div className="flex h-10 items-center justify-between border-b border-white/10 bg-[#090D10]/95 px-3 sm:px-4">
+                    <div className="flex items-center gap-2">
+                      <span className="h-1.5 w-1.5 rounded-full bg-[#53C9BF]" aria-hidden="true" />
+                      <span className="text-[0.57rem] font-semibold uppercase tracking-[0.15em] text-white/55">
+                        TrustNet / {visual.label}
+                      </span>
+                    </div>
+                    <ArrowUpRight size={14} className={`transition-opacity ${isActive ? "opacity-70" : "opacity-0 group-hover:opacity-70"}`} aria-hidden="true" />
+                  </div>
+                  <img
+                    src={visual.image}
+                    alt={visual.alt}
+                    className="h-[calc(100%-2.5rem)] w-full object-cover object-top transition-transform duration-700 group-hover:scale-[1.012]"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/70 to-transparent" aria-hidden="true" />
+                  {!isActive ? (
+                    <span className="absolute bottom-3 left-3 hidden text-[0.58rem] font-semibold uppercase tracking-[0.14em] text-white/70 sm:block">
+                      Click to inspect
+                    </span>
+                  ) : null}
+                </motion.a>
+              );
+            })}
+          </div>
+
+          <div className="-mt-7 grid gap-5 border-t border-white/12 pt-6 sm:-mt-3 lg:grid-cols-[1fr_auto] lg:items-end">
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={active.id}
+                initial={reduceMotion ? false : { opacity: 0, y: 10, filter: "blur(5px)" }}
+                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                exit={reduceMotion ? undefined : { opacity: 0, y: -8, filter: "blur(4px)" }}
+                transition={{ duration: 0.34, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <p className="text-[0.64rem] font-semibold uppercase tracking-[0.16em] text-[#8FE3DC]">{active.proof}</p>
+                <h3 className="mt-3 text-2xl font-bold tracking-[-0.02em] text-white sm:text-3xl">{active.title}</h3>
+                <p className="mt-3 max-w-2xl text-sm font-light leading-6 text-white/60 sm:text-base">{active.detail}</p>
+              </motion.div>
+            </AnimatePresence>
+            <a
+              href={active.href}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex w-fit items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-white/65 transition-colors hover:text-[#A7F0EA] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8FE3DC]"
+            >
+              Open this evidence <ArrowUpRight size={15} aria-hidden="true" />
+            </a>
+          </div>
+        </div>
+
+        <div className="mt-14 border-y border-white/10 py-5">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <p className="text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-white/38">Deployment path</p>
+              <p className="mt-1 text-sm text-white/62">A reviewer-readable route from interface to runtime evidence.</p>
+            </div>
+            <ol className="flex flex-wrap items-center gap-x-3 gap-y-2" aria-label="TrustNet deployment architecture">
+              {architecture.map((item, index) => (
+                <li key={item} className="flex items-center gap-3">
+                  <span className="text-[0.64rem] font-semibold uppercase tracking-[0.11em] text-white/65">{item}</span>
+                  {index < architecture.length - 1 ? <ArrowRight size={13} className="text-[#53C9BF]/60" aria-hidden="true" /> : null}
+                </li>
+              ))}
+            </ol>
           </div>
         </div>
       </div>
