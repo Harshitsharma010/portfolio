@@ -355,7 +355,6 @@ export default function StormCore({
     let frame = 0;
     let inViewport = true;
     let pageVisible = !document.hidden;
-    let windowFocused = true;
     let previousTime = 0;
     const startTime = performance.now();
     const frameInterval = 1000 / (isMobile ? 24 : 30);
@@ -424,7 +423,7 @@ export default function StormCore({
     };
 
     const animate = (time: number) => {
-      if (!inViewport || !pageVisible || !windowFocused) return;
+      if (!inViewport || !pageVisible) return;
       if (activeRef.current && time - previousTime >= frameInterval) {
         previousTime = time;
         draw();
@@ -434,7 +433,7 @@ export default function StormCore({
 
     const scheduleAnimation = () => {
       window.cancelAnimationFrame(frame);
-      if (inViewport && pageVisible && windowFocused && !reduceMotion) {
+      if (inViewport && pageVisible && !reduceMotion) {
         frame = window.requestAnimationFrame(animate);
       }
     };
@@ -451,19 +450,8 @@ export default function StormCore({
       pageVisible = !document.hidden;
       scheduleAnimation();
     };
-    const handleWindowFocus = () => {
-      windowFocused = true;
-      scheduleAnimation();
-    };
-    const handleWindowBlur = () => {
-      windowFocused = false;
-      scheduleAnimation();
-    };
-
     visibilityObserver.observe(container);
     document.addEventListener("visibilitychange", handleVisibilityChange);
-    window.addEventListener("focus", handleWindowFocus);
-    window.addEventListener("blur", handleWindowBlur);
     scheduleAnimation();
 
     return () => {
@@ -471,8 +459,6 @@ export default function StormCore({
       resizeObserver.disconnect();
       visibilityObserver.disconnect();
       document.removeEventListener("visibilitychange", handleVisibilityChange);
-      window.removeEventListener("focus", handleWindowFocus);
-      window.removeEventListener("blur", handleWindowBlur);
       geometry.dispose();
       orbitGeometryA.dispose();
       orbitGeometryB.dispose();

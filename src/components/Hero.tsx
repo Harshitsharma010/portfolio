@@ -1,6 +1,4 @@
 import {
-  lazy,
-  Suspense,
   useCallback,
   useEffect,
   useRef,
@@ -16,14 +14,35 @@ import {
 } from "framer-motion";
 import RoleRotator from "./RoleRotator";
 
-let stormCoreModule: Promise<typeof import("./StormCore")> | null = null;
+type StormCoreModule = typeof import("./StormCore");
+
+let stormCoreModule: Promise<StormCoreModule> | null = null;
 
 function loadStormCore() {
-  stormCoreModule ??= import("./StormCore");
+  stormCoreModule ??= import("./StormCore").catch((error) => {
+    stormCoreModule = null;
+    throw error;
+  });
   return stormCoreModule;
 }
 
-const StormCore = lazy(loadStormCore);
+async function loadStormCoreWithRetry() {
+  let lastError: unknown;
+
+  for (const delay of [0, 650, 1600]) {
+    if (delay) {
+      await new Promise((resolve) => window.setTimeout(resolve, delay));
+    }
+
+    try {
+      return await loadStormCore();
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  throw lastError;
+}
 
 const introGreetings = ["Hello", "Namaste", "Bonjour"];
 const PRE_INTRO_MS = 5400;
@@ -263,6 +282,7 @@ export default function Hero() {
   const [introVideoReady, setIntroVideoReady] = useState(false);
   const [welcomeReady, setWelcomeReady] = useState(() => introPhase !== "welcome");
   const [stormEnabled, setStormEnabled] = useState(() => introPhase !== "welcome");
+  const [StormCoreComponent, setStormCoreComponent] = useState<StormCoreModule["default"] | null>(null);
   const [coreLaunching, setCoreLaunching] = useState(false);
   const finishIntro = useCallback(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
@@ -329,9 +349,15 @@ export default function Hero() {
     if (introPhase !== "welcome") return;
     let cancelled = false;
     const timer = window.setTimeout(() => {
-      void loadStormCore().then(() => {
-        if (!cancelled) setStormEnabled(true);
-      });
+      void loadStormCoreWithRetry()
+        .then((module) => {
+          if (cancelled) return;
+          setStormCoreComponent(() => module.default);
+          setStormEnabled(true);
+        })
+        .catch(() => {
+          // The hero remains usable and the next phase retries the visual.
+        });
     }, STORM_PREPARE_MS);
 
     return () => {
@@ -341,17 +367,23 @@ export default function Hero() {
   }, [introPhase]);
 
   useEffect(() => {
-    if (introPhase !== "video" || stormEnabled) return;
+    if (introPhase === "welcome" || StormCoreComponent) return;
     let cancelled = false;
 
-    void loadStormCore().then(() => {
-      if (!cancelled) setStormEnabled(true);
-    });
+    void loadStormCoreWithRetry()
+      .then((module) => {
+        if (cancelled) return;
+        setStormCoreComponent(() => module.default);
+        setStormEnabled(true);
+      })
+      .catch(() => {
+        // Keep the static hero available if the WebGL chunk cannot load.
+      });
 
     return () => {
       cancelled = true;
     };
-  }, [introPhase, stormEnabled]);
+  }, [introPhase, StormCoreComponent]);
 
   useEffect(() => {
     if (introPhase !== "welcome" || !welcomeReady) return;
@@ -597,18 +629,16 @@ export default function Hero() {
           animate={{ opacity: heroVisible ? 1 : 0, scale: heroVisible ? 1 : 0.94 }}
           transition={{ duration: reduceMotion ? 0 : 0.72, delay: heroVisible ? 0.12 : 0, ease: [0.16, 1, 0.3, 1] }}
         >
-          {stormEnabled ? (
-            <Suspense fallback={<div className="aspect-square w-[min(88vw,560px)]" aria-hidden="true" />}>
-              <StormCore
-                reduceMotion={reduceMotion}
-                scrollY={galaxyY}
-                scrollScale={galaxyScale}
-                scrollOpacity={galaxyOpacity}
-                reveal={introPhase !== "welcome"}
-                active={introPhase === "clouds" || introPhase === "done"}
-                launching={coreLaunching}
-              />
-            </Suspense>
+          {stormEnabled && StormCoreComponent ? (
+            <StormCoreComponent
+              reduceMotion={reduceMotion}
+              scrollY={galaxyY}
+              scrollScale={galaxyScale}
+              scrollOpacity={galaxyOpacity}
+              reveal={introPhase !== "welcome"}
+              active={introPhase === "clouds" || introPhase === "done"}
+              launching={coreLaunching}
+            />
           ) : (
             <div className="aspect-square w-[min(88vw,560px)]" aria-hidden="true" />
           )}
